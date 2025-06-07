@@ -1,0 +1,70 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Website</title>
+  <style>
+    /* Your existing CSS styles here */
+
+    .h1 {
+      text-align: center;
+      background-color: black; /* Background color for the heading */
+      color: white; /* Text color */
+      padding: 10px; /* Add some padding to the heading */
+      border-radius: 5px; /* Rounded corners */
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Text shadow */
+  }
+
+    .button-container {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+
+    body {
+      background-image: url('{% static "Tracking/media/kpm.jpg" %}');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      text-align: center;
+    }
+
+
+    .button {
+      background-color: black;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Add your header, slideshow, and parallax sections here -->
+
+  <h1 class="h1">STUDENT COLLEGE ACHIEVEMENT SYSTEM
+    <a href="{% url 'adminLogin'%}" style="float: right;">
+      <img src="{% static "Tracking/media/admin2.jpg" %}" alt="Admin" class="button-image" height="35px">
+    </a>
+  </h1>
+
+
+
+  <div class="button-container">
+    <a href="{% url 'login'%}" class="button">Student</a>
+    <a href="{% url 'advisorLogin'%}" class="button">Advisor</a>
+  </div>
+  <!-- Rest of your content here -->
+</body>
+</html>
+

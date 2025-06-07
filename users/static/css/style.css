@@ -1,0 +1,565 @@
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    background-color: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.header {
+    background-color: white;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 0 0 10px 10px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    font-size: 24px;
+    color: #4a5568;
+}
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: #7fc29b;
+}
+
+.header-middle {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.header-middle a {
+    color: #7fc29b;
+    text-decoration: none;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+}
+
+.profile-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    min-width: 150px;
+    z-index: 100;
+}
+
+.profile-dropdown a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.profile-dropdown a:hover {
+    background-color: #f5f5f5;
+}
+
+.profile-dropdown.show {
+    display: block;
+}
+
+.back-link {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2d3748;
+    flex-grow: 1;
+    /* Allow title to take space */
+    text-align: right;
+    margin-right: 80px;
+    text-decoration: none;
+    /* Offset for header-right buttons */
+}
+
+.page-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2d3748;
+    flex-grow: 1;
+    /* Allow title to take space */
+    text-align: center;
+    margin-right: 80px;
+    /* Offset for header-right buttons */
+}
+
+.header-button {
+    background-color: #fce4ec;
+    /* Light pink background */
+    color: #e91e63;
+    /* Pink text color */
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-button:hover {
+    background-color: #f8bbd0;
+    transform: translateY(-2px);
+}
+
+
+/* Filter section */
+
+.filter-bar {
+    background-color: white;
+    padding: 10px 20px;
+    margin: 20px auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-wrap: wrap;
+    /* Allow wrapping on smaller screens */
+    justify-content: center;
+    /* Center items when wrapping */
+    gap: 15px;
+    /* Space between filter buttons */
+    max-width: 90%;
+    /* Fluid width */
+    width: fit-content;
+    /* Adjust width to content */
+}
+
+.filter-button {
+    background-color: #edf2f7;
+    /* Light gray */
+    color: #4a5568;
+    /* Dark gray text */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    /* More rounded pills */
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    /* For anchor tags */
+}
+
+.filter-button:hover {
+    background-color: #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Active filter button style */
+
+.filter-button.active {
+    background-color: #7fc29b;
+    /* Blue for active */
+    color: white;
+}
+
+.filter-icon {
+    font-size: 16px;
+}
+
+
+/* Property grid */
+
+.property-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    /* Responsive grid */
+    gap: 25px;
+    /* Space between cards */
+    padding: 20px;
+    max-width: 1200px;
+    /* Max width for the grid */
+    width: 100%;
+    /* Fluid width */
+    margin: 0 auto;
+    /* Center the grid */
+    flex-grow: 1;
+    /* Allow grid to take available space */
+    max-height: 300px;
+    clear: both;
+}
+
+
+/* Property card */
+
+.property-card {
+    background-color: white;
+    border-radius: 15px;
+    /* Rounded corners for cards */
+    overflow: hidden;
+    /* Hide overflow for image */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    /* Soft shadow */
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+}
+
+.property-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.property-image-container {
+    width: 100%;
+    padding-bottom: 60%;
+    /* Aspect ratio 5:3 (height is 60% of width) */
+    position: relative;
+    background-color: #f0f0f0;
+    /* Placeholder background */
+}
+
+.property-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px 15px 0 0;
+    /* Rounded top corners */
+}
+
+.property-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    /* Allow info section to grow */
+}
+
+.property-location {
+    font-size: 14px;
+    color: #718096;
+    /* Lighter gray for location */
+    margin-bottom: 5px;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+.property-details {
+    font-size: 15px;
+    color: #4a5568;
+    /* Darker gray for details */
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.property-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+    /* Darkest for price */
+    margin-top: auto;
+    text-decoration: none;
+    /* Push price to bottom */
+}
+
+
+/* Pagination styles */
+
+.pagination {
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 20px;
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 10px 10px 0 0;
+    position: fixed;
+    /* Fixes the pagination at the bottom */
+    bottom: 0;
+    /* Positions it at the bottom */
+    left: 0;
+    /* Aligns it to the left */
+    right: 0;
+    /* Aligns it to the right */
+}
+
+.pagination a,
+.pagination span {
+    display: inline-block;
+    padding: 8px 15px;
+    margin: 0 5px;
+    text-decoration: none;
+    color: #7fc29b;
+    border: 1px solid #7fc29b;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.pagination a:hover {
+    background-color: #7fc29b;
+}
+
+.pagination .current-page {
+    background-color: #7fc29b;
+    color: white;
+    font-weight: bold;
+    border-color: #7fc29b;
+}
+
+
+/* Filter form (for 'Filters' button) */
+
+.filter-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.3s ease;
+}
+
+.filter-modal.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.filter-form-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.filter-modal.show .filter-form-content {
+    transform: translateY(0);
+}
+
+.filter-form-content h2 {
+    margin-top: 0;
+    color: #2d3748;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.form-group input[type="number"],
+.form-group select {
+    width: calc(100% - 20px);
+    /* Adjust for padding */
+    padding: 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.form-actions .apply-filters {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.form-actions .apply-filters:hover {
+    background-color: #0056b3;
+}
+
+.form-actions .clear-filters {
+    background-color: #f7fafc;
+    color: #4a5568;
+    border: 1px solid #cbd5e0;
+}
+
+.form-actions .clear-filters:hover {
+    background-color: #edf2f7;
+}
+
+
+/* Responsive adjustments */
+
+@media (max-width: 768px) {
+    .header {
+        padding: 10px 15px;
+    }
+    .header-button {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+    .filter-bar {
+        margin: 15px auto;
+        padding: 8px 15px;
+        gap: 10px;
+        max-width: 95%;
+    }
+    .filter-button {
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+    .property-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        padding: 15px;
+        gap: 20px;
+    }
+    .property-card {
+        border-radius: 12px;
+    }
+    .property-image-container {
+        padding-bottom: 65%;
+        /* Slightly taller aspect ratio on small screens */
+    }
+    .property-image {
+        border-radius: 12px 12px 0 0;
+    }
+    .property-info {
+        padding: 12px;
+    }
+    .property-location,
+    .property-details {
+        font-size: 13px;
+    }
+    .property-price {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-left {
+        gap: 5px;
+    }
+    .logo-icon {
+        font-size: 20px;
+    }
+    .logo-text {
+        font-size: 18px;
+    }
+    .header-right {
+        gap: 10px;
+    }
+    .filter-bar {
+        flex-direction: column;
+        /* Stack filters vertically */
+        align-items: stretch;
+        /* Stretch buttons */
+        padding: 10px;
+    }
+    .filter-button {
+        width: 100%;
+        /* Full width when stacked */
+        justify-content: center;
+    }
+    .property-grid {
+        grid-template-columns: 1fr;
+        /* Single column on very small screens */
+        padding: 10px;
+        gap: 15px;
+    }
+    .filter-form-content {
+        padding: 20px;
+        margin: 0 10px;
+        /* Some side margin */
+    }
+}
+
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.action-button {
+    flex: 1;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    min-width: 120px;
+    /* Ensure buttons don't get too small */
+}
+
+.book-now {
+    background-color: #7fc29b;
+    /* Pink primary button */
+    color: white;
+    border: none;
+}
+
+.book-now:hover {
+    background-color: #d81b60;
+}
+
+.chat-owner {
+    background-color: white;
+    color: #4a5568;
+    border: 1px solid #cbd5e0;
+}
+
+.chat-owner:hover {
+    background-color: #f7fafc;
+}

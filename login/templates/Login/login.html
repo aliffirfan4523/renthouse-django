@@ -1,0 +1,100 @@
+{# Login/templates/login/login.html #} {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login | RentUrHouse</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+
+<body>
+    <div class="container">
+        <div class="left">
+            <h1>Welcome To RentUrHouse,<br>Student Rent House System</h1>
+            <p>The only website that matches your preference with our rental house</p>
+        </div>
+        <div class="right">
+            <div class="center-links">
+                <h2>Log in</h2>
+            </div>
+            <div class="card">
+                <div class="center-links">
+                    <div class="white">
+                        {# ADDED ID AND CLASS HERE #}
+                        <h3 id="welcomeMessage" class="role-welcome">Welcome back, Tenant!</h3>
+                    </div>
+                </div>
+                <div class="white">
+                    <h5>Log in to get started</h5>
+                </div>
+                <form method="POST" action="{% url 'login:login' %}"> {# ACTION URL IS NAMESPACED login:login #} {% csrf_token %} {# Display non-field errors if any #} {% if form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <input type="text" name="username" placeholder="Email address or Username" required value="{{ request.POST.username }}">
+                    <input type="password" name="password" placeholder="Password" required> {# ADDED ID HERE #}
+                    <input type="hidden" name="role_type" id="roleType" value="tenant">
+                    <button type="submit">Login</button>
+                </form>
+                <div class="center-links">
+                    <div class="a">
+                        <a href="#">Forgot Password?</a><br> {# REGISTER URL IS NAMESPACED login:register_user #}
+                        <a href="{% url 'login:register_user' %}">Register as new user</a>
+                    </div>
+                </div>
+            </div>
+            <button id="toggleRoleBtn" class="student-btn">Login as Student</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleRoleBtn = document.getElementById('toggleRoleBtn');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const roleTypeInput = document.getElementById('roleType');
+            let currentRole = 'tenant'; // Initial role
+
+            // Function to update UI based on role
+            function updateUIForRole(role) {
+                if (role === 'tenant') {
+                    welcomeMessage.textContent = 'Welcome back, Tenant!';
+                    toggleRoleBtn.textContent = 'Login as Student';
+                    roleTypeInput.value = 'tenant';
+                } else { // role === 'student'
+                    welcomeMessage.textContent = 'Welcome back, Student!';
+                    toggleRoleBtn.textContent = 'Login as Tenant';
+                    roleTypeInput.value = 'student';
+                }
+                currentRole = role;
+            }
+
+            // Handle button click
+            toggleRoleBtn.addEventListener('click', function() {
+                if (currentRole === 'tenant') {
+                    updateUIForRole('student');
+                } else {
+                    updateUIForRole('tenant');
+                }
+            });
+
+            // If you want to initialize the UI based on a previous role (e.g., if a login attempt failed)
+            // You could pass a context variable like 'initial_role' from the view.
+            const initialRoleFromContext = "{{ role_type_initial }}";
+            if (initialRoleFromContext && initialRoleFromContext !== "None" && initialRoleFromContext !== currentRole) {
+                updateUIForRole(initialRoleFromContext);
+            }
+
+            // Initialize UI based on any pre-selected role (e.g., if coming from a redirect)
+            // Or if you want to remember the last choice (requires more complex storage)
+            // For now, it defaults to tenant and can be toggled.
+            // If you want to initialize based on an error for a specific role,
+            // you'd pass a context variable from the view.
+        });
+    </script>
+</body>
+
+</html>

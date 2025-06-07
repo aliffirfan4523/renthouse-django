@@ -1,0 +1,315 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Move-in Notice | RentUrHouse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Your combined CSS #}
+    <style>
+        /* Specific styles for the Move-in Notice page */
+        
+        .notice-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1000px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            flex-grow: 1;
+        }
+        
+        .notice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .notice-header .back-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .notice-header .back-link svg {
+            margin-right: 5px;
+            font-size: 20px;
+        }
+        
+        .notice-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            flex-grow: 1;
+            text-align: center;
+            margin: 0;
+        }
+        
+        .notice-content {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            /* Allow columns to wrap */
+        }
+        
+        .left-column-notice {
+            flex: 1;
+            min-width: 300px;
+            background-color: #f7fafc;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .right-column-notice {
+            flex: 1.5;
+            /* Takes more space for tips */
+            min-width: 300px;
+        }
+        
+        .notice-detail-block {
+            margin-bottom: 25px;
+        }
+        
+        .notice-detail-block h3 {
+            font-size: 18px;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .notice-detail-block p {
+            font-size: 16px;
+            color: #4a5568;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .add-to-calendar-btn {
+            background-color: #7fc29b;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            font-size: 14px;
+            align-self: flex-start;
+            /* Align to start of flex container */
+            margin-bottom: 15px;
+        }
+        
+        .add-to-calendar-btn:hover {
+            background-color: #63a780;
+        }
+        
+        .map-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #718096;
+            font-size: 16px;
+            margin-top: auto;
+            /* Push to bottom if content is short */
+        }
+        
+        .move-in-tips h3 {
+            font-size: 20px;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .move-in-tips ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin: 0;
+        }
+        
+        .move-in-tips ul li {
+            font-size: 15px;
+            color: #4a5568;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .notice-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+            align-items: flex-end;
+            /* Align buttons to the right */
+        }
+        
+        .notice-actions button {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            width: fit-content;
+            /* Adjust width to content */
+        }
+        
+        .contact-owner-btn {
+            background-color: #f7fafc;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+        }
+        
+        .contact-owner-btn:hover {
+            background-color: #edf2f7;
+        }
+        
+        .leave-review-btn {
+            background-color: #7fc29b;
+            /* Main accent color */
+            color: white;
+            border: none;
+        }
+        
+        .leave-review-btn:hover {
+            background-color: #63a780;
+        }
+        /* Responsive adjustments */
+        
+        @media (max-width: 768px) {
+            .notice-container {
+                padding: 20px;
+                margin: 15px auto;
+            }
+            .notice-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            .notice-header h2 {
+                text-align: left;
+                margin-right: 0;
+                font-size: 20px;
+            }
+            .notice-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .left-column-notice,
+            .right-column-notice {
+                min-width: unset;
+                width: 100%;
+                padding: 20px;
+            }
+            .notice-actions {
+                align-items: stretch;
+                /* Stretch buttons to full width */
+            }
+            .notice-actions button {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .notice-container {
+                border-radius: 0;
+                padding: 15px;
+            }
+            .notice-header h2 {
+                font-size: 18px;
+            }
+            .notice-detail-block h3 {
+                font-size: 16px;
+            }
+            .notice-detail-block p {
+                font-size: 14px;
+            }
+            .add-to-calendar-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            .move-in-tips h3 {
+                font-size: 18px;
+            }
+            .move-in-tips ul li {
+                font-size: 13px;
+            }
+            .notice-actions button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="notice-container">
+        <div class="notice-header">
+            <a href="{% url 'users:home' %}" class="back-link">
+                <!-- SVG for back arrow icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>                Homepage
+            </a>
+            <h2>Move-in notice</h2>
+            {# Placeholder for right-aligned header element if needed, e.g., profile icon #}
+        </div>
+
+        <div class="notice-content">
+            <div class="left-column-notice">
+                <div class="notice-detail-block">
+                    <h3>Move-in Date</h3>
+                    <button class="add-to-calendar-btn">Add to calendar</button>
+                    <p>{{ booking.start_date|date:"F d, Y" }}</p>
+                </div>
+
+                <div class="notice-detail-block">
+                    <h3>House name & locations</h3>
+                    <p>
+                        {% if booking.property.number_of_rooms %} Room {{ booking.property.number_of_rooms }}A, {% endif %} {{ booking.property.title }}
+                        <br> {{ booking.property.address|linebreaksbr }}
+                    </p>
+                </div>
+                <div class="map-placeholder">
+                    [Map Placeholder]
+                </div>
+            </div>
+
+            <div class="right-column-notice">
+                <div class="move-in-tips">
+                    <h3>Move-in tips</h3>
+                    <ul>
+                        <li>Read your tenancy agreement - Know your rent, rules, and responsibilities.</li>
+                        <li>Confirm move-in details - Date, time, and how to collect keys.</li>
+                        <li>Pack essentials - ID, clothes, bedding, toiletries, charger, study gear.</li>
+                        <li>Inspect the room - Take photos of any damage and report it.</li>
+                        <li>Meet housemates - Be friendly and respectful.</li>
+                        <li>Check safety - Find fire exits, emergency contacts, and fuse box.</li>
+                        <li>Set up utilities & WiFi - If not included, arrange it early.</li>
+                        <li>Register locally - GP, university address, voter registration (if needed).</li>
+                        <li>Personalize your space - Decorate without damaging walls.</li>
+                        <li>Stick to a budget - Track rent, food, and transport costs.</li>
+                    </ul>
+                </div>
+                <div class="notice-actions">
+                    <a href="{% url 'users:chat_with_owner' property_pk=property.pk owner_pk=property.owner.pk %}" class="contact-owner-btn">Contact owner</a>
+                    <button class="leave-review-btn">Leave review</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

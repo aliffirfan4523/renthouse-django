@@ -1,0 +1,416 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book {{ property.title }} | RentUrHouse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Assuming your combined CSS is here #}
+    <style>
+        /* Specific styles for the booking form */
+        
+        .booking-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 100px);
+            /* Adjust based on header/footer height */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .booking-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            /* Allow columns to wrap on smaller screens */
+            width: 100%;
+            max-width: 900px;
+            /* Max width of the booking card */
+            overflow: hidden;
+            /* Ensure rounded corners */
+            border: 1px solid #e0e0e0;
+        }
+        
+        .booking-left,
+        .booking-right {
+            padding: 30px;
+            box-sizing: border-box;
+        }
+        
+        .booking-left {
+            flex: 2;
+            /* Form column */
+            min-width: 300px;
+            /* Minimum width for form */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .booking-right {
+            flex: 1;
+            /* Property details column */
+            min-width: 250px;
+            /* Minimum width for details */
+            background-color: #f7fafc;
+            border-left: 1px solid #eef2f6;
+            /* Separator line */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .booking-form .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .booking-form label {
+            display: block;
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+        
+        .booking-form input[type="text"],
+        .booking-form input[type="email"],
+        .booking-form input[type="number"],
+        .booking-form input[type="date"],
+        .booking-form textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            color: #2d3748;
+        }
+        
+        .booking-form input::placeholder,
+        .booking-form textarea::placeholder {
+            color: #a0aec0;
+        }
+        
+        .booking-form textarea {
+            resize: vertical;
+        }
+        /* Property Details Card in Right Column */
+        
+        .property-summary-card {
+            background-color: white;
+            /* Inner white card */
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            flex-grow: 1;
+            /* Allow it to fill space */
+        }
+        
+        .property-summary-card .image-container {
+            width: 100%;
+            padding-bottom: 60%;
+            /* Aspect ratio for image */
+            position: relative;
+            background-color: #e2e8f0;
+        }
+        
+        .property-summary-card img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .property-summary-info {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .property-summary-info h4 {
+            margin: 0;
+            font-size: 18px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .property-summary-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .property-summary-info .address {
+            font-size: 13px;
+            color: #718096;
+        }
+        
+        .property-summary-info .price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-top: 5px;
+        }
+        
+        .property-summary-info .amenities-list {
+            font-size: 13px;
+            color: #4a5568;
+        }
+        
+        .property-summary-info .spots-left {
+            font-weight: 600;
+            color: #e91e63;
+            /* Red for urgency */
+        }
+        
+        .terms-link {
+            font-size: 14px;
+            color: #7fc29b;
+            text-decoration: none;
+            margin-top: 10px;
+            display: block;
+        }
+        /* Buttons at the bottom of the right column */
+        
+        .booking-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: auto;
+            /* Push buttons to the bottom */
+            padding-top: 15px;
+            border-top: 1px solid #eef2f6;
+        }
+        
+        .booking-actions button {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            white-space: nowrap;
+            /* Prevent button text from wrapping too early */
+        }
+        
+        .booking-actions .book-now-btn {
+            background-color: #7fc29b;
+            /* Main accent color */
+            color: white;
+            border: none;
+        }
+        
+        .booking-actions .book-now-btn:hover {
+            background-color: #63a780;
+        }
+        
+        .booking-actions .message-host-btn {
+            background-color: white;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+        }
+        
+        .booking-actions .message-host-btn:hover {
+            background-color: #f7fafc;
+        }
+        /* Error Messages (from Django forms) */
+        
+        .errorlist {
+            color: #e53e3e;
+            /* Red color for errors */
+            font-size: 0.875em;
+            list-style-type: none;
+            padding: 0;
+            margin-top: 5px;
+        }
+        
+        .errorlist li {
+            margin-bottom: 5px;
+        }
+        /* Responsive adjustments */
+        
+        @media (max-width: 768px) {
+            .booking-card {
+                flex-direction: column;
+                padding: 0;
+                /* Remove padding from card itself to let children control it */
+            }
+            .booking-left,
+            .booking-right {
+                padding: 20px;
+                min-width: unset;
+                width: 100%;
+                border-left: none;
+            }
+            .booking-right {
+                border-top: 1px solid #eef2f6;
+                /* Add top border when stacked */
+            }
+            .booking-actions {
+                flex-direction: column;
+                /* Stack buttons vertically */
+                gap: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .booking-left,
+            .booking-right {
+                padding: 15px;
+            }
+            .booking-form input,
+            .booking-form textarea,
+            .booking-actions button {
+                font-size: 14px;
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header Section (reusing from combined CSS) -->
+    <header class="header">
+        <div class="header-left">
+            <a href="{% url 'users:property_detail' pk=property.pk %}" class="back-link">
+                <!-- SVG for back arrow icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>                Back to details
+            </a>
+        </div>
+        <div class="page-title">Booking Form</div>
+        <div class="header-right">
+            <a href="#">
+                <img class="logo-icon" src="{% static 'img/Chat Button.svg' %}" alt="Chat" width="40" height="40">
+            </a>
+            <div class="profile-menu">
+                <a href="#" id="menu-button">
+                    <img class="logo-icon" src="{% static 'img/Menu Button.svg' %}" alt="Menu" width="120" height="40">
+                </a>
+                <div class="profile-dropdown" id="menu-dropdown">
+                    {% if user.is_authenticated %}
+                    <a href="#">My Profile</a>
+                    <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Booking Container -->
+    <div class="booking-container">
+        <div class="booking-card">
+            <div class="booking-left">
+                <form method="post" class="booking-form">
+                    {% csrf_token %} {# Display non-field errors if any #} {% if form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="{{ form.full_name_on_form.id_for_label }}">Full Name :</label> {{ form.full_name_on_form }} {% if form.full_name_on_form.errors %}
+                        <ul class="errorlist">{% for error in form.full_name_on_form.errors %}
+                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.student_id_number.id_for_label }}">Student ID / Matriculation Number :</label> {{ form.student_id_number }} {% if form.student_id_number.errors %}
+                        <ul class="errorlist">{% for error in form.student_id_number.errors %}
+                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.email_on_form.id_for_label }}">Email Address :</label> {{ form.email_on_form }} {% if form.email_on_form.errors %}
+                        <ul class="errorlist">{% for error in form.email_on_form.errors %}
+                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.current_address_on_form.id_for_label }}">Current Address :</label> {{ form.current_address_on_form }} {% if form.current_address_on_form.errors %}
+                        <ul class="errorlist">{% for error in form.current_address_on_form.errors %}
+                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.university_name_on_form.id_for_label }}">University / College Name :</label> {{ form.university_name_on_form }} {% if form.university_name_on_form.errors %}
+                        <ul class="errorlist">{% for error in form.university_name_on_form.errors %}
+                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.expected_duration_of_stay.id_for_label }}">Expected Duration of Stay :</label> {{ form.expected_duration_of_stay }} {% if form.expected_duration_of_stay.errors %}
+                        <ul class="errorlist">{% for error in form.expected_duration_of_stay.errors %}
+                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.start_date.id_for_label }}">Expected Move-in Date :</label> {{ form.start_date }} {% if form.start_date.errors %}
+                        <ul class="errorlist">{% for error in form.start_date.errors %}
+                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.end_date.id_for_label }}">Expected Move-out Date :</label> {{ form.end_date }} {% if form.end_date.errors %}
+                        <ul class="errorlist">{% for error in form.end_date.errors %}
+                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.spots_booked.id_for_label }}">Spots / Rooms to Book :</label> {{ form.spots_booked }} {% if form.spots_booked.errors %}
+                        <ul class="errorlist">{% for error in form.spots_booked.errors %}
+                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                        <small>{{ form.spots_booked.help_text }}</small>
+                    </div>
+
+                    {# Hidden fields for property and tenant, set in view #} {# <input type="hidden" name="property" value="{{ property.pk }}"> #} {# <input type="hidden" name="tenant" value="{{ request.user.pk }}"> #}
+
+                    <div class="booking-actions">
+                        <button type="submit" class="book-now-btn">Book Now</button>
+                        <button type="button" class="message-host-btn">Message Host</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="booking-right">
+                <div class="property-summary-card">
+                    <div class="image-container">
+                        {% if property.main_image %}
+                        <img src="{{ property.main_image }}" alt="{{ property.title }}"> {% else %}
+                        <img src="https://placehold.co/400x240/e2e8f0/718096?text=No+Image" alt="No Image Available"> {% endif %}
+                    </div>
+                    <div class="property-summary-info">
+                        <h4>{{ property.title }}</h4>
+                        <p class="address">{{ property.address|linebreaksbr }}</p>
+                        <p>{{ property.house_type }} - {{ property.number_of_rooms }} Room{% if property.number_of_rooms != 1 %}s{% endif %} ({{ property.available_spots }} Room{% if property.available_spots != 1 %}s{% endif %} Left)</p>
+                        <p class="price">RM {{ property.rent }} per Month/Room</p>
+                        <p class="price">RM {{ property.rent|add:"800" }} Deposit</p> {# Example deposit calculation, adjust as needed #}
+                        <p class="amenities-list">
+                            {% for amenity in property.amenities.all %} {{ amenity.name }}{% if not forloop.last %}, {% endif %} {% empty %} No amenities listed. {% endfor %}
+                        </p>
+                        <a href="#" class="terms-link">Read Terms & Condition and Agreement of Rental</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuButton = document.getElementById('menu-button');
+            const dropdown = document.getElementById('menu-dropdown');
+
+            menuButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                dropdown.classList.toggle('show');
+            });
+
+            window.addEventListener('click', function(e) {
+                if (!menuButton.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

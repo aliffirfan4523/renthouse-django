@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RentUrHouse - Property Listings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../static/css/style.css" />
+</head>
+
+<body>
+
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-left">
+            <img class="logo-icon" src="../static/img/Logo.svg" alt="Logo" width="40" height="40">
+            <span class="logo-text">RentUrHouse</span>
+        </div>
+        <div class="header-middle">
+            <a href="#" class="button-text"> Home </a>
+            <a href="#" class="button-text">Search House </a>
+        </div>
+        <div class="header-right">
+            <a href="#">
+                <img class="logo-icon" src="../static/img/Chat Button.svg" alt="Chat" width="40" height="40">
+            </a>
+            <div class="profile-menu">
+                <a href="#" id="menu-button">
+                    <img class="logo-icon" src="../static/img/Menu Button.svg" alt="Menu" width="120" height="40">
+                </a>
+                <div class="profile-dropdown" id="menu-dropdown">
+                    {% if user.is_authenticated %}
+                    <a href="#">My Profile</a>
+                    <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Filter Bar Section -->
+    <section class="filter-bar">
+        <!-- Price Filter -->
+        <a href="{% url 'users:home' %}?price_sort={% if current_price_sort == 'desc' %}asc{% else %}desc{% endif %}{% for key, value in request.GET.items %}{% if key != 'page' and key != 'price_sort' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="filter-button {% if current_price_sort %}active{% endif %}">
+            <span class="filter-icon">{% if current_price_sort == 'desc' %}⬇️{% elif current_price_sort == 'asc' %}⬆️{% else %}⇅{% endif %}</span> Price
+        </a>
+
+        <!-- Room Filter (Example for 3 rooms, you'd expand this with more options or a dropdown) -->
+        <a href="{% url 'users:home' %}?room_count=3{% for key, value in request.GET.items %}{% if key != 'page' and key != 'room_count' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="filter-button {% if current_room_count == '3' %}active{% endif %}">
+            <span class="filter-icon">🛏️</span> 3 Rooms
+        </a>
+
+        <!-- House Type Filter (Example for Condominium) -->
+        <a href="{% url 'users:home' %}?house_type=condominium{% for key, value in request.GET.items %}{% if key != 'page' and key != 'house_type' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="filter-button {% if current_house_type == 'condominium' %}active{% endif %}">
+            <span class="filter-icon">🏠</span> Condominium
+        </a>
+
+        <!-- Filters Button (Opens a modal form) -->
+        <button class="filter-button" onclick="document.getElementById('filterModal').classList.add('show');">
+            <span class="filter-icon">⚙️</span> Filters
+        </button>
+    </section>
+
+    <!-- Property Grid Section -->
+    <main class="property-grid">
+        {% if properties %} {% for property in properties %}
+        <a href="{% url 'users:property_detail' pk=property.id %}" class="property-card">
+            <div class="property-image-container">
+                {% if property.main_image %}
+                <img src="{{ property.main_image }}" alt="{{ property.house_type }} at {{ property.address }}" class="property-image"> {% else %}
+                <img src="https://placehold.co/600x360/A0A0A0/FFFFFF?text=No+Image" alt="No image available" class="property-image"> {% endif %}
+            </div>
+            <div class="property-info">
+                <div class="property-title">{{ property.title }}</div>
+                <div class="property-location">{{ property.address|truncatechars:30 }}</div>
+                <div class="property-details">{{ property.house_type|capfirst }}{% if property.number_of_rooms %}, {{ property.number_of_rooms }} Room{% if property.number_of_rooms != 1 %}s{% endif %}{% endif %}{% if property.course %}, {{ property.course }}{% endif %}</div>
+                <!-- Added title -->
+                <div class="property-spot">Spot Left: {{ property.available_spots }}</div>
+                <!-- Added spot left -->
+                <div class="property-price">RM {{ property.rent }} per Month</div>
+            </div>
+        </a>
+        {% endfor %} {% else %}
+        <p style="text-align: center; width: 100%; padding: 50px;">No available properties found matching your criteria.</p>
+        {% endif %}
+
+
+        <!-- Pagination Section -->
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a> {% endif %}
+            <span class="current-page">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span> {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a> {% endif %}
+        </div>
+    </main>
+    {% endif %}
+
+    <!-- Filter Modal (Hidden by default) -->
+    <div id="filterModal" class="filter-modal" onclick="if (event.target === this) this.classList.remove('show');">
+        <div class="filter-form-content">
+            <h2>Advanced Filters</h2>
+            <form action="{% url 'users:home' %}" method="get">
+                <div class="form-group">
+                    <label for="id_room_count">Number of Rooms:</label>
+                    <input type="number" id="id_room_count" name="room_count" min="1" value="{{ current_room_count }}">
+                </div>
+                <div class="form-group">
+                    <label for="id_house_type">Property Type:</label>
+                    <select id="id_house_type" name="house_type">
+                        <option value="">Any Type</option>
+                        {% for type_choice in property_type_choices %}
+                            <option value="{{ type_choice.0 }}" {% if current_house_type == type_choice.0 %}selected{% endif %}>{{ type_choice.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_min_rent">Minimum Rent:</label>
+                    <input type="number" id="id_min_rent" name="min_rent" min="0" value="{{ request.GET.min_rent }}">
+                </div>
+                <div class="form-group">
+                    <label for="id_max_rent">Maximum Rent:</label>
+                    <input type="number" id="id_max_rent" name="max_rent" min="0" value="{{ request.GET.max_rent }}">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="clear-filters" onclick="window.location.href='{% url 'users:home' %}';">Clear Filters</button>
+                    <button type="submit" class="apply-filters">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- JavaScript for dropdown -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuButton = document.getElementById('menu-button');
+            const dropdown = document.getElementById('menu-dropdown');
+
+            menuButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                dropdown.classList.toggle('show');
+            });
+
+            window.addEventListener('click', function(e) {
+                if (!menuButton.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,427 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with {{ owner.full_name|default:owner.username }} | RentUrHouse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Your combined CSS #}
+    <script src="{% static 'script/main.js' %}"></script>
+    <style>
+        /* Specific styles for the Chat Page */
+        
+        .chat-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 80px);
+            /* Adjust based on header/footer height */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .chat-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            width: 100%;
+            max-width: 1100px;
+            /* Wider for chat */
+            height: 70vh;
+            /* Fixed height for chat area */
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .chat-left-panel {
+            flex: 2;
+            /* Chat area */
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #eef2f6;
+        }
+        
+        .chat-right-panel {
+            flex: 1;
+            /* Property details summary */
+            background-color: #f7fafc;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Chat Header */
+        
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            background-color: #fbfbfc;
+        }
+        
+        .chat-header h3 {
+            margin: 0;
+            font-size: 20px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .chat-header p {
+            margin: 0;
+            font-size: 13px;
+            color: #718096;
+        }
+        /* Chat Messages Area */
+        
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            /* Scrollable chat history */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .message-bubble.sent {
+            background-color: #dcf8c6;
+            /* Light green for sent messages */
+            align-self: flex-end;
+            /* Align to right */
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message-bubble.received {
+            background-color: #f0f0f0;
+            /* Light gray for received messages */
+            align-self: flex-start;
+            /* Align to left */
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-bubble small {
+            display: block;
+            font-size: 0.75em;
+            color: #718096;
+            text-align: right;
+            /* Time for sent messages */
+            margin-top: 5px;
+        }
+        
+        .message-bubble.received small {
+            text-align: left;
+            /* Time for received messages */
+        }
+        /* Message Input Area */
+        
+        .chat-input-area {
+            padding: 15px 20px;
+            border-top: 1px solid #e0e0e0;
+            background-color: #fbfbfc;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .chat-message-input {
+            flex-grow: 1;
+            border: 1px solid #cbd5e0;
+            border-radius: 25px;
+            /* Rounded input field */
+            padding: 10px 15px;
+            font-size: 16px;
+            resize: none;
+            /* Disable manual resize */
+            overflow: hidden;
+            /* Hide scrollbar if content overflows */
+        }
+        
+        .chat-send-btn {
+            background-color: #7fc29b;
+            /* Main accent color */
+            color: white;
+            border: none;
+            border-radius: 50%;
+            /* Circular button */
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .chat-send-btn:hover {
+            background-color: #63a780;
+        }
+        /* Property Summary Card in Right Panel (reusing from booking page) */
+        
+        .property-summary-card {
+            background-color: white;
+            /* Inner white card */
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            flex-grow: 1;
+            /* Allow it to fill space */
+        }
+        
+        .property-summary-card .image-container {
+            width: 100%;
+            padding-bottom: 60%;
+            /* Aspect ratio for image */
+            position: relative;
+            background-color: #e2e8f0;
+        }
+        
+        .property-summary-card img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .property-summary-info {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .property-summary-info h4 {
+            margin: 0;
+            font-size: 18px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .property-summary-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .property-summary-info .address {
+            font-size: 13px;
+            color: #718096;
+        }
+        
+        .property-summary-info .price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-top: 5px;
+        }
+        
+        .property-summary-info .amenities-list {
+            font-size: 13px;
+            color: #4a5568;
+        }
+        
+        .property-summary-info .spots-left {
+            font-weight: 600;
+            color: #e91e63;
+            /* Red for urgency */
+        }
+        
+        .terms-link {
+            font-size: 14px;
+            color: #7fc29b;
+            text-decoration: none;
+            margin-top: 10px;
+            display: block;
+        }
+        /* Responsive adjustments */
+        
+        @media (max-width: 900px) {
+            .chat-card {
+                flex-direction: column;
+                height: 85vh;
+                /* Adjust height for stacked layout */
+            }
+            .chat-left-panel {
+                border-right: none;
+                border-bottom: 1px solid #eef2f6;
+                flex: 1.5;
+                /* Chat takes more space when stacked */
+            }
+            .chat-right-panel {
+                flex: 1;
+                /* Property summary takes less space when stacked */
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .chat-container {
+                padding: 10px;
+            }
+            .chat-header {
+                padding: 10px 15px;
+            }
+            .chat-header h3 {
+                font-size: 18px;
+            }
+            .chat-messages {
+                padding: 15px;
+            }
+            .message-bubble {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+            .chat-input-area {
+                padding: 10px 15px;
+            }
+            .chat-message-input {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+            .chat-send-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            .chat-right-panel {
+                padding: 15px;
+            }
+            .property-summary-info h4 {
+                font-size: 16px;
+            }
+            .property-summary-info p {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header Section (similar to other pages) -->
+    <header class="header">
+        <div class="header-left">
+            <a href="{% url 'users:property_detail' pk=property.pk %}" class="back-link">
+                <!-- SVG for back arrow icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>                Room Details
+            </a>
+        </div>
+        <div class="page-title">Contact {{ owner.full_name|default:owner.username }}</div>
+        <div class="header-right">
+            <a href="#">
+                <img class="logo-icon" src="{% static 'img/Chat Button.svg' %}" alt="Chat" width="40" height="40">
+            </a>
+            <div class="profile-menu">
+                <a href="#" id="menu-button">
+                    <img class="logo-icon" src="{% static 'img/Menu Button.svg' %}" alt="Menu" width="120" height="40">
+                </a>
+                <div class="profile-dropdown" id="menu-dropdown">
+                    {% if user.is_authenticated %}
+                    <a href="#">My Profile</a>
+                    <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Chat Container -->
+    <div class="chat-container">
+        <div class="chat-card">
+            <div class="chat-left-panel">
+                <div class="chat-header">
+                    <h3>Contact {{ owner.full_name|default:owner.username }}</h3>
+                    <p>Typically responds within an hour</p>
+                </div>
+
+                <div class="chat-messages">
+                    {% for message in chat_messages %}
+                    <div class="message-bubble {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                        {{ message.message }}
+                        <small>{{ message.timestamp|date:"P" }}</small>
+                    </div>
+                    {% empty %}
+                    <p style="text-align: center; color: #718096;">Start the conversation!</p>
+                    {% endfor %}
+                </div>
+
+                <form method="post" class="chat-input-area">
+                    {% csrf_token %} {{ form.message }}
+                    <button type="submit" class="chat-send-btn">
+                        <!-- SVG for send icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </form>
+            </div>
+
+            <div class="chat-right-panel">
+                <div class="property-summary-card">
+                    <div class="image-container">
+                        {% if property.main_image %}
+                        <img src="{{ property.main_image }}" alt="{{ property.title }}"> {% else %}
+                        <img src="https://placehold.co/400x240/e2e8f0/718096?text=No+Image" alt="No Image Available"> {% endif %}
+                    </div>
+                    <div class="property-summary-info">
+                        <h4>{{ property.title }}</h4>
+                        <p class="address">{{ property.address|linebreaksbr }}</p>
+                        <p>{{ property.house_type }}{% if property.number_of_rooms %}, {{ property.number_of_rooms }} Room{% if property.number_of_rooms != 1 %}s{% endif %}{% endif %}</p>
+                        <p class="price">RM {{ property.rent }} / Months</p>
+                        <p class="price">RM {{ property.rent|add:"500" }} Deposit RM 80 Security Deposit</p> {# Example deposit calculation #}
+
+                        <!-- Move in / Move out dates are often specific to a booking, not just property -->
+                        <!-- If you want to show these, you'd need to pass a specific booking object to the chat view -->
+                        <p>Move in date: DD/MM/YYYY</p>
+                        <p>Move out date: DD/MM/YYYY</p>
+
+                        <p>Select unit: [Dropdown]</p> {# Placeholder: This likely needs specific booking logic #}
+                        <p>Payment method: [Dropdown]</p> {# Placeholder: This likely needs specific booking logic #} {% if property.available_spots > 0 %}
+                        <a href="{% url 'users:book_property' pk=property.pk %}" class="action-button book-now">Book now</a> {% else %}
+                        <button class="action-button" disabled>Fully Booked</button> {% endif %}
+                        <button type="button" id="requestViewingBtn" class="action-button chat-owner">Request Viewing</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+
+            // --- NEW: Auto-type Request Viewing message ---
+            const chatInput = document.querySelector('.chat-message-input'); // Selects the <textarea>
+            const requestViewingBtn = document.getElementById('requestViewingBtn');
+            const chatSendBtn = document.querySelector('.chat-send-btn'); // Assuming this is your send button
+
+            if (requestViewingBtn && chatInput && chatSendBtn) {
+                requestViewingBtn.addEventListener('click', function() {
+                    const predefinedMessage = "Hi, I'm interested in viewing this property. Could we schedule a viewing soon?";
+                    chatInput.value = predefinedMessage;
+
+                    // Optional: Automatically send the message after typing
+                    // This simulates a click on the send button, which will trigger the form submission.
+                    // Be aware that this will immediately send the message without user confirmation.
+                    chatSendBtn.click();
+
+                    // Alternatively, just populate the field and let the user click send:
+                    // No chatSendBtn.click() here if you want user to manually send.
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
