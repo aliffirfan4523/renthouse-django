@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import CustomUser, Property, Amenity,Booking, ChatMessage 
+from .models import CustomUser, Property, Amenity,Booking, ChatMessage, MaintenanceRequest 
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -83,3 +83,11 @@ class ChatMessageAdmin(admin.ModelAdmin):
     search_fields = ('sender__username', 'receiver__username', 'property__title', 'message')
     raw_id_fields = ('sender', 'receiver', 'property') # Use raw_id_fields for FKs
     readonly_fields = ('timestamp',) # Timestamp is auto_now_add
+
+@admin.register(MaintenanceRequest) # NEW: Register MaintenanceRequest
+class MaintenanceRequestAdmin(admin.ModelAdmin):
+    list_display = ('issue_title', 'property', 'submitted_by', 'status', 'priority', 'submitted_date')
+    list_filter = ('status', 'priority', 'submitted_date', 'property__title', 'submitted_by__username')
+    search_fields = ('issue_title', 'issue_description', 'property__title', 'submitted_by__username')
+    raw_id_fields = ('submitted_by', 'property') # Use raw_id_fields for FKs
+    readonly_fields = ('submitted_date',)

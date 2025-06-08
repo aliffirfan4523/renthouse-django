@@ -22,7 +22,7 @@
                 <div class="center-links">
                     <div class="white">
                         {# ADDED ID AND CLASS HERE #}
-                        <h3 id="welcomeMessage" class="role-welcome">Welcome back, Tenant!</h3>
+                        <h3 id="welcomeMessage" class="role-welcome">Welcome back, Owner!</h3>
                     </div>
                 </div>
                 <div class="white">
@@ -37,8 +37,16 @@
                     {% endif %}
                     <input type="text" name="username" placeholder="Email address or Username" required value="{{ request.POST.username }}">
                     <input type="password" name="password" placeholder="Password" required> {# ADDED ID HERE #}
-                    <input type="hidden" name="role_type" id="roleType" value="tenant">
-                    <button type="submit">Login</button>
+                    <input type="hidden" name="role_type" id="roleType" value="owner">
+                    <button type="submit">Login</button> {# NEW: Django Messages Display Area #} {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %} {# The 'tags' attribute holds the message level (e.g., 'error', 'success', 'info') #}
+                        <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>
+                            {{ message }}
+                            </li>
+                            {% endfor %}
+                    </ul>
+                    {% endif %}
                 </form>
                 <div class="center-links">
                     <div class="a">
@@ -56,17 +64,17 @@
             const toggleRoleBtn = document.getElementById('toggleRoleBtn');
             const welcomeMessage = document.getElementById('welcomeMessage');
             const roleTypeInput = document.getElementById('roleType');
-            let currentRole = 'tenant'; // Initial role
+            let currentRole = 'owner'; // Initial role
 
             // Function to update UI based on role
             function updateUIForRole(role) {
-                if (role === 'tenant') {
-                    welcomeMessage.textContent = 'Welcome back, Tenant!';
+                if (role === 'owner') {
+                    welcomeMessage.textContent = 'Welcome back, Landlord!';
                     toggleRoleBtn.textContent = 'Login as Student';
-                    roleTypeInput.value = 'tenant';
+                    roleTypeInput.value = 'owner';
                 } else { // role === 'student'
                     welcomeMessage.textContent = 'Welcome back, Student!';
-                    toggleRoleBtn.textContent = 'Login as Tenant';
+                    toggleRoleBtn.textContent = 'Login as Landlord';
                     roleTypeInput.value = 'student';
                 }
                 currentRole = role;
@@ -74,10 +82,10 @@
 
             // Handle button click
             toggleRoleBtn.addEventListener('click', function() {
-                if (currentRole === 'tenant') {
+                if (currentRole === 'owner') {
                     updateUIForRole('student');
                 } else {
-                    updateUIForRole('tenant');
+                    updateUIForRole('owner');
                 }
             });
 
@@ -90,7 +98,7 @@
 
             // Initialize UI based on any pre-selected role (e.g., if coming from a redirect)
             // Or if you want to remember the last choice (requires more complex storage)
-            // For now, it defaults to tenant and can be toggled.
+            // For now, it defaults to owner and can be toggled.
             // If you want to initialize based on an error for a specific role,
             // you'd pass a context variable from the view.
         });

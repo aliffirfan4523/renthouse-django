@@ -6,7 +6,8 @@ from .forms import BookingForm, MessageForm # Import the new BookingForm
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin # For views that require login
 from django.contrib.auth.decorators import login_required # For function-based views
-
+from django.http import JsonResponse # NEW: Import JsonResponse for API
+from django.db.models import F, Q # Make sure F is imported
 class HomePropertyListView(ListView):
     # This view will fetch data from the Property model
     model = Property
@@ -22,7 +23,7 @@ class HomePropertyListView(ListView):
     def get_queryset(self):
         # By default, ListView retrieves all objects for the model.
         # Here, we'll refine it to only show available properties, ordered by creation date.
-        queryset = super().get_queryset().filter(is_available=True).order_by('-created_at')
+        queryset = super().get_queryset().filter(is_available=True, total_spots__gt=F('booked_spots')).order_by('-created_at')
 
         # You can add filtering based on URL parameters here if you add search/filter forms later
         # Example for filtering by 'course' from URL:
@@ -170,52 +171,118 @@ def move_in_notice(request, booking_pk):
     }
     return render(request, 'move_in_notice.html', context)
 
+# --- MODIFIED: chat_view ---
 @login_required
-def chat_view(request, property_pk, owner_pk):
-    # Ensure current user is involved in the chat (either as sender or receiver)
-    # and that the property exists.
+def chat_view(request, property_pk, other_user_pk):
     property_obj = get_object_or_404(Property, pk=property_pk)
-    owner_obj = get_object_or_404(CustomUser, pk=owner_pk) # The property owner/host
+    target_user = get_object_or_404(CustomUser, pk=other_user_pk)
 
-    # Ensure the current user is either the property owner OR a user intending to chat with the owner
-    if not (request.user == owner_obj or request.user.is_authenticated):
+    # Security check: Ensure the current user is either the property owner OR the person chatting with the owner
+    is_authorized = False
+
+    # Scenario 1: Landlord (logged-in user) is chatting with a tenant/student
+    if request.user == property_obj.owner and (target_user.role == 'student' or target_user.role == 'tenant'):
+        is_authorized = True
+    # Scenario 2: Tenant/Student (logged-in user) is chatting with the landlord (property owner)
+    elif (request.user.role == 'student' or request.user.role == 'tenant') and target_user == property_obj.owner:
+        is_authorized = True
+    # Scenario 3: Admin access (optional)
+    elif request.user.is_superuser: # Admins can view any chat
+        is_authorized = True
+
+    if not is_authorized:
         messages.error(request, "You are not authorized to view this chat.")
-        return redirect('users:home') # Or appropriate redirect
+        return redirect('users:home')
 
-    # Determine the other participant in the chat (the user who is NOT the current user)
-    other_participant = owner_obj if request.user != owner_obj else property_obj.owner # Should always be owner_obj here
+    # Determine if the currently logged-in user IS the owner of this property
+    is_current_user_owner = (request.user == property_obj.owner)
 
     # Filter messages relevant to this conversation (between current user and owner, about this property)
     chat_messages = ChatMessage.objects.filter(
-        Q(sender=request.user, receiver=owner_obj, property=property_obj) |
-        Q(sender=owner_obj, receiver=request.user, property=property_obj)
+        Q(sender=request.user, receiver=target_user, property=property_obj) |
+        Q(sender=target_user, receiver=request.user, property=property_obj)
     ).order_by('timestamp')
 
     # Handle sending new messages
+     # Handle sending new messages
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
             message_content = form.cleaned_data['message']
+            # Determine receiver based on who the 'other_user' is
+            # If current user is owner, send to target_user (tenant/student)
+            # If current user is tenant/student, send to property owner
+            actual_receiver = target_user if request.user == property_obj.owner else property_obj.owner
+
             ChatMessage.objects.create(
                 sender=request.user,
-                receiver=owner_obj,
+                receiver=actual_receiver, # The calculated receiver
                 property=property_obj,
                 message=message_content
             )
             messages.success(request, "Message sent!")
-            # Redirect to GET to prevent form resubmission
-            return redirect('users:chat_with_owner', property_pk=property_pk, owner_pk=owner_pk)
+            # Redirect back to the same chat view to prevent form resubmission
+            return redirect('users:chat_with_user', property_pk=property_pk, other_user_pk=other_user_pk)
         else:
             messages.error(request, "Please correct the message error.")
     else:
-        form = MessageForm() # Empty form for GET request
+        form = MessageForm()
 
     context = {
         'property': property_obj,
-        'owner': owner_obj, # The owner of the property
+        'target_user': target_user, # Pass the 'other' person in chat for displaying their name
         'chat_messages': chat_messages,
         'form': form,
         'logo_text_color': '#7fc29b',
         'header_button_color': '#e91e63',
+        'is_current_user_owner': is_current_user_owner,
     }
     return render(request, 'chat_page.html', context)
+
+# --- NEW: API Endpoint for Recent Chats ---
+@login_required
+def recent_chats_api_view(request):
+    user = request.user
+
+    # Get recent chat messages where the current user is either sender or receiver
+    # This is a bit complex: we want the *last* message for each unique conversation.
+    # A conversation is defined by (property, other_participant).
+
+    # First, get all messages involving the current user, ordered by timestamp desc
+    all_user_messages = ChatMessage.objects.filter(
+        Q(sender=user) | Q(receiver=user)
+    ).order_by('-timestamp')
+
+    conversations = {} # Key: (property_id, other_user_id) -> LastMessage
+
+    for msg in all_user_messages:
+        # Determine the other participant in this specific message context
+        other_participant = msg.sender if msg.receiver == user else msg.receiver
+
+        # Skip if the other_participant is the current user themselves (self-chat)
+        if other_participant == user:
+            continue
+
+        # Create a unique key for this conversation
+        # Ensures that a chat about Property A with User X is distinct from Property B with User X
+        conversation_key = (msg.property.pk, other_participant.pk)
+
+        # If this conversation key hasn't been seen yet, or if this message is newer, store it
+        if conversation_key not in conversations:
+            conversations[conversation_key] = {
+                'property_id': msg.property.pk,
+                'property_title': msg.property.title,
+                'property_main_image': msg.property.main_image.url if msg.property.main_image else None,
+                'other_user_id': other_participant.pk,
+                'other_user_username': other_participant.username,
+                'other_user_full_name': other_participant.full_name or other_participant.username,
+                'last_message': msg.message,
+                'last_message_timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                'last_message_is_read': msg.is_read,
+                'last_message_sender_is_me': (msg.sender == user),
+            }
+
+    # Convert the dictionary values to a list for JSON response
+    recent_chats_list = list(conversations.values())
+
+    return JsonResponse({'chats': recent_chats_list})

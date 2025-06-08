@@ -11,34 +11,57 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
 
-
-# --- NEW: Login View ---
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('users:home') # Redirect already logged-in users
+        # If user is already logged in, redirect them based on their actual role
+        if request.user.role == 'owner':
+            return redirect('owner:owner_dashboard')
+        elif request.user.role == 'student':
+            return redirect('users:home')
+        elif request.user.role == 'admin': # Consider a separate admin dashboard
+            return redirect('admin:index')
+        return redirect('users:home') # Default for any other role or general redirect
 
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        role_type = request.POST.get('role_type') # Get the role type from the hidden field
+        # Get the role type selected on the form (client-side input)
+        role_type_from_form = request.POST.get('role_type')
 
-        # Authenticate the user
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            login(request, user) # Log the user in
-            messages.success(request, f"Welcome back, {user.full_name or user.username}!")
-            # You can redirect based on role_type if needed here
-            # For now, just redirect to home page
-            return redirect('users:home')
+            # --- NEW VALIDATION LOGIC START ---
+            # Compare the role selected on the form with the user's actual role from the database
+            if user.role != role_type_from_form and user.role != 'admin':
+                messages.error(request, f"Account Not Found")
+                # Re-render the login page, keeping the selected role_type from the form
+                # so the toggle button state reflects the user's choice.
+                return render(request, 'login/login.html', {'role_type_initial': role_type_from_form})
+            # --- NEW VALIDATION LOGIC END ---
+
+            # If roles match, proceed with login
+            login(request, user)
+            #messages.success(request, f"Welcome back, {user.full_name or user.username}!")
+
+            # Redirect based on the user's actual, verified role
+            if user.role == 'owner':
+                return redirect('owner:owner_dashboard')
+            elif user.role == 'student':
+                return redirect('users:home')
+            elif user.role == 'admin':
+                return redirect('admin:index')
+            else:
+                return redirect('users:home') # Fallback
+
         else:
-            # Authentication failed
+            # Authentication (username/password) failed
             messages.error(request, "Invalid username or password. Please try again.")
-            # Re-render the login page with an error message
-            # Pass role_type back to keep the UI state on failed login
-            return render(request, 'login/login.html', {'role_type_initial': role_type})
+            # Re-render the login page with error, preserving the selected role_type from the form
+            return render(request, 'login/login.html', {'role_type_initial': role_type_from_form})
 
     # For GET request, render the empty login form
+    # You might want to pass an initial role_type if you want a default state for the toggle
     return render(request, 'login/login.html')
 
 # --- NEW: Logout View ---

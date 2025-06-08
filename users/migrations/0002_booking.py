@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(choices=[('pending', 'Pending'), ('confirmed', 'Confirmed'), ('rejected', 'Rejected'), ('cancelled', 'Cancelled'), ('completed', 'Completed')], default='pending', max_length=20)),
                 ('spots_booked', models.IntegerField(default=1, help_text='Number of spots/rooms the user wants to book.')),
                 ('property', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookings', to='users.property')),
-                ('tenant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='my_bookings', to=settings.AUTH_USER_MODEL)),
+                ('landlord', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='my_bookings', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name_plural': 'Bookings',

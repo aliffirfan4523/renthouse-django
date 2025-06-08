@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Dashboard',
+    'tenant',
+    'owner',
     'login',
     'users',
 ]
@@ -127,9 +128,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static_files_root'), # If you have a project-wide static folder
-]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # Target for collectstatic
 
 # Default primary key field type
@@ -142,3 +140,5 @@ AUTH_USER_MODEL = 'users.CustomUser' # IMPORTANT: Tells Django to use your custo
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'

@@ -34,7 +34,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = (
         ('student', 'Student'),
-        ('tenant', 'Tenant'),
+        ('owner', 'Owner'),
         ('admin', 'Admin'),
     )
 
@@ -237,3 +237,37 @@ class ChatMessage(models.Model):
 
     def __str__(self):
         return f"From {self.sender.username} to {self.receiver.username} on {self.property.title} at {self.timestamp.strftime('%Y-%m-%d %H:%M')}"
+
+class MaintenanceRequest(models.Model):
+    STATUS_CHOICES = (
+        ('new', 'New'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('rejected', 'Rejected'),
+    )
+    PRIORITY_CHOICES = (
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
+    )
+
+    # Who submitted the request
+    submitted_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='maintenance_requests')
+    # For which property
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='property_maintenance_requests')
+
+    # Request details
+    issue_title = models.CharField(max_length=200)
+    issue_description = models.TextField()
+    submitted_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    # Optional: Images of the issue, resolution notes, resolution date etc.
+
+    class Meta:
+        verbose_name_plural = "Maintenance Requests"
+        ordering = ['-submitted_date'] # Order by most recent requests
+
+    def __str__(self):
+        return f"Maintenance on {self.property.title} by {self.submitted_by.username}: {self.issue_title}"

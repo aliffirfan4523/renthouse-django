@@ -7,6 +7,9 @@
     <title>RentUrHouse - {{ property.title }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"> {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Your combined CSS #}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
     <style>
         /* Base styles */
         
@@ -674,11 +677,8 @@
                     <p class="location-info">
                         {{ property.address }}
                     </p>
-                    <div class="map-placeholder">
-                        Map Placeholder
-                    </div>
+                    <div id="map" style="height: 300px;"></div>
                 </section>
-
                 <!-- Reviews Section -->
                 <section class="reviews-section">
                     <h3>Reviews</h3>
@@ -769,13 +769,83 @@
                         {% if property.available_spots > 0 %}
                         <a href="{% url 'users:book_property' pk=property.pk %}" class="action-button book-now">Book now</a> {% else %}
                         <button class="action-button" disabled>Fully Booked</button> {% endif %}
-                        <a href="{% url 'users:chat_with_owner' property_pk=property.pk owner_pk=property.owner.pk %}" class="action-button chat-owner">Chat owner</a>
+                        <a href="{% url 'users:chat_with_user' property_pk=property.pk other_user_pk=property.owner.pk %}" class="action-button chat-owner">Message Host</a>
                     </div>
                 </section>
             </div>
         </div>
     </div>
     <script>
+        const fullAddress = "{{ property.address|escapejs }}";
+        const mapElement = document.getElementById("map"); // Dapatkan elemen peta sekali
+
+        console.log("Alamat lengkap diteruskan ke skrip peta:", fullAddress);
+
+        function fetchAndDisplayMap(addressToSearch) {
+            if (!mapElement) {
+                console.error("Elemen peta dengan ID 'map' tidak ditemukan.");
+                return; // Keluar jika elemen peta tidak ada
+            }
+
+            mapElement.innerHTML = "Memuat peta..."; // Tampilkan pesan loading
+            mapElement.style.color = '#718096'; // Atur warna teks loading
+            mapElement.style.textAlign = 'center'; // Atur posisi teks loading
+
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressToSearch)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Kesalahan HTTP! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const lat = data[0].lat;
+                        const lon = data[0].lon;
+                        console.log("Lokasi ditemukan untuk '" + addressToSearch + "':", lat, lon);
+
+                        // Pastikan elemen peta kosong sebelum menginisialisasi Leaflet
+                        mapElement.innerHTML = '';
+                        const map = L.map('map').setView([lat, lon], 15);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; kontributor OpenStreetMap'
+                        }).addTo(map);
+                        L.marker([lat, lon]).addTo(map).bindPopup(fullAddress).openPopup(); // Tetap tampilkan alamat lengkap di popup
+                    } else {
+                        console.warn("Nominatim API tidak menemukan hasil untuk alamat:", addressToSearch);
+                        // Jika ini adalah alamat lengkap dan tidak ada hasil, coba yang lebih sederhana
+                        if (addressToSearch === fullAddress) {
+                            const parts = fullAddress.split(',');
+                            if (parts.length > 2) { // Coba dengan kota/negara bagian/negara jika alamat lengkap gagal
+                                // Coba versi yang lebih sederhana: gabungkan bagian terakhir (misalnya, kota dan negara bagian)
+                                const simplerAddress = parts.slice(-2).join(',').trim();
+                                console.log("Mencoba alamat yang lebih sederhana:", simplerAddress);
+                                fetchAndDisplayMap(simplerAddress); // Panggilan rekursif dengan alamat yang lebih sederhana
+                            } else {
+                                mapElement.innerText = "Lokasi tidak ditemukan untuk '" + fullAddress + "'";
+                                mapElement.style.color = '#e53e3e'; // Warna merah untuk kesalahan
+                            }
+                        } else { // Jika alamat yang lebih sederhana juga gagal
+                            mapElement.innerText = "Lokasi tidak ditemukan untuk '" + fullAddress + "'";
+                            mapElement.style.color = '#e53e3e'; // Warna merah untuk kesalahan
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Kesalahan saat mengambil atau memproses data lokasi:", error);
+                    mapElement.innerText = "Kesalahan memuat peta: " + error.message;
+                    mapElement.style.color = '#e53e3e'; // Warna merah untuk kesalahan
+                });
+        }
+
+        // Mulai proses pemuatan peta dengan alamat lengkap
+        if (fullAddress.trim() !== "") {
+            fetchAndDisplayMap(fullAddress);
+        } else {
+            mapElement.innerText = "Tidak ada alamat yang disediakan untuk properti ini.";
+            mapElement.style.color = '#718096';
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const menuButton = document.getElementById('menu-button');
             const dropdown = document.getElementById('menu-dropdown');

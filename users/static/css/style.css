@@ -563,3 +563,377 @@ body {
 .chat-owner:hover {
     background-color: #f7fafc;
 }
+
+
+/* In users/static/css/main_app.css */
+
+
+/* --- Chat Popup Styles --- */
+
+.chat-popup-container {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 350px;
+    /* Adjust width as needed */
+    height: 450px;
+    /* Adjust height as needed */
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    /* Ensure it's on top of other content */
+    flex-direction: column;
+    overflow: hidden;
+    /* For rounded corners */
+}
+
+.chat-popup-container.show {
+    display: flex;
+}
+
+.chat-popup-header {
+    background-color: #7fc29b;
+    /* Your accent color */
+    color: white;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 15px 15px 0 0;
+    /* Rounded top corners */
+}
+
+.chat-popup-header .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    /* For consistent icon size */
+}
+
+.chat-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    /* Scrollable list of chats */
+    padding: 10px;
+    background-color: #f7fafc;
+}
+
+.chat-list-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    /* Ensure link style is removed */
+    color: inherit;
+    /* Inherit color */
+}
+
+.chat-list-item:last-child {
+    border-bottom: none;
+}
+
+.chat-list-item:hover {
+    background-color: #edf2f7;
+}
+
+.chat-list-item-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #cbd5e0;
+    /* Placeholder color */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    color: #718096;
+    overflow: hidden;
+    margin-right: 10px;
+    flex-shrink: 0;
+    /* Prevent shrinking */
+}
+
+.chat-list-item-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.chat-list-item-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-list-item-name {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 15px;
+}
+
+.chat-list-item-property {
+    font-size: 12px;
+    color: #718096;
+    margin-top: 2px;
+}
+
+.chat-list-item-message {
+    font-size: 14px;
+    color: #4a5568;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Truncate long messages */
+    margin-top: 5px;
+}
+
+.chat-list-item-timestamp {
+    font-size: 10px;
+    color: #a0aec0;
+    text-align: right;
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+
+/* Responsive adjustments for popup */
+
+@media (max-width: 480px) {
+    .chat-popup-container {
+        width: 100%;
+        height: 80%;
+        /* Takes more screen space */
+        bottom: 0;
+        right: 0;
+        left: 0;
+        border-radius: 15px 15px 0 0;
+        /* Only top corners rounded */
+    }
+}
+
+.chat-card {
+    display: flex;
+    /* Essential for flexbox layout */
+    /* ... rest of chat-card styles ... */
+}
+
+.chat-left-panel {
+    flex: 2;
+    /* Default when right panel is present */
+    border-right: 1px solid #eef2f6;
+    /* Default border */
+    /* ... rest of chat-left-panel styles ... */
+}
+
+
+/* NEW: Style for chat-left-panel when it takes full width (right panel is hidden) */
+
+.chat-left-panel.full-width-chat {
+    flex: 1;
+    /* Make it take all available space */
+    border-right: none;
+    /* Remove the right border */
+}
+
+.chat-right-panel {
+    flex: 1;
+    /* Property details summary */
+    /* ... rest of chat-right-panel styles ... */
+}
+
+
+/* Responsive adjustments for stacking (no change here, but for context) */
+
+@media (max-width: 900px) {
+    .chat-card {
+        flex-direction: column;
+        /* Stacks panels */
+        /* ... */
+    }
+    .chat-left-panel {
+        border-right: none;
+        /* Always remove right border when stacked */
+        border-bottom: 1px solid #eef2f6;
+        /* Add bottom border when stacked */
+        /* ... */
+    }
+    /* When stacked, 'full-width-chat' effectively has no further visual impact
+       on flex, but keeping 'border-right: none' is still useful. */
+}
+
+
+/* In users/static/css/main_app.css */
+
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    gap: 30px;
+    /* Space between sections */
+    flex-grow: 1;
+}
+
+.dashboard-grid {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.dashboard-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+/* Set consistent width for the three cards */
+
+.dashboard-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+
+/* Specifically target the Payment Tracking card */
+
+.dashboard-card.payment-tracking {
+    flex: 1 1 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.dashboard-card h2 {
+    color: #2d3748;
+    font-size: 22px;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #7fc29b;
+    /* Accent border */
+    padding-bottom: 10px;
+}
+
+
+/* Responsive adjustments */
+
+@media (max-width: 1024px) {
+    .dashboard-container {
+        padding: 15px;
+        gap: 20px;
+    }
+    .dashboard-card {
+        padding: 20px;
+    }
+    .dashboard-card h2 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* REMOVED: grid-template-columns: 1fr; from here */
+    /* This allows the default grid-template-columns (auto-fit) to work on tablets */
+    .dashboard-grid {
+        /* You might want to adjust gap or other spacing for tablets here, but not column count */
+        gap: 20px;
+        /* Slightly smaller gap for tablets */
+    }
+    .dashboard-welcome h1 {
+        font-size: 24px;
+    }
+    .property-list li {
+        flex-wrap: wrap;
+        /* Allow wrapping */
+        gap: 10px;
+    }
+    .property-actions-tiny {
+        flex-direction: row;
+        /* Keep actions in a row if space allows */
+        flex-wrap: wrap;
+        width: 100%;
+        /* Take full width for better button spacing */
+        justify-content: flex-end;
+    }
+    .property-info-tiny {
+        flex-grow: 1;
+        /* Allow content to grow */
+    }
+    .dashboard-card {
+        flex: 1 1 100%;
+        /* stack full width on small screens */
+    }
+}
+
+@media (max-width: 992px) {
+    .dashboard-card {
+        flex: 1 1 100%;
+    }
+    .dashboard-card.payment-tracking {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    /* This breakpoint is typically for small mobile devices */
+    .dashboard-container {
+        padding: 10px;
+    }
+    .dashboard-card {
+        padding: 15px;
+        border-radius: 10px;
+    }
+    .dashboard-card h2 {
+        font-size: 18px;
+        padding-bottom: 8px;
+    }
+    .dashboard-welcome h1 {
+        font-size: 20px;
+    }
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        /* <--- NOW IT COLLAPSES TO A SINGLE COLUMN HERE */
+        gap: 15px;
+    }
+    .booking-list li,
+    .maintenance-request-list li,
+    .recent-chats-list li {
+        padding: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .booking-actions-mini,
+    .status-priority,
+    .maintenance-actions-mini {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: flex-start;
+        /* Align actions to start */
+    }
+    .property-actions-tiny {
+        flex-direction: column;
+        /* Stack actions vertically */
+        width: auto;
+        /* Revert width */
+        justify-content: flex-start;
+    }
+    .property-actions-tiny a {
+        width: 100%;
+        /* Make buttons full width */
+    }
+}

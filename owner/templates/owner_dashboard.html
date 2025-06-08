@@ -1,0 +1,677 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard | RentUrHouse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Your combined CSS #}
+    <script src="{% static 'script/main.js' %}"></script>
+    <style>
+        /* Dashboard Specific Styles */
+        
+        .dashboard-welcome {
+            background-color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        
+        .dashboard-welcome h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .dashboard-welcome p {
+            color: #718096;
+            font-size: 16px;
+        }
+        /* My Properties Card */
+        
+        .property-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .property-list li {
+            background-color: #f7fafc;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .property-list li:last-child {
+            margin-bottom: 0;
+        }
+        
+        .property-image-tiny {
+            width: 70px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+            flex-shrink: 0;
+        }
+        
+        .property-info-tiny {
+            flex-grow: 1;
+        }
+        
+        .property-info-tiny h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #2d3748;
+        }
+        
+        .property-info-tiny p {
+            margin: 2px 0;
+            font-size: 13px;
+            color: #718096;
+        }
+        
+        .property-info-tiny .status-label {
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-transform: capitalize;
+        }
+        
+        .status-occupied {
+            background-color: #ffe0b2;
+            color: #ff9800;
+        }
+        
+        .status-vacant {
+            background-color: #e6fffa;
+            color: #38a169;
+        }
+        
+        .property-actions-tiny {
+            display: flex;
+            flex-direction: column;
+            /* Stack actions */
+            gap: 5px;
+            flex-shrink: 0;
+        }
+        
+        .property-actions-tiny a {
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .view-listing {
+            background-color: #bbdefb;
+            color: #2196f3;
+        }
+        
+        .edit-listing {
+            background-color: #fce4ec;
+            color: #e91e63;
+        }
+        
+        .view-bookings {
+            background-color: #e3f2fd;
+            color: #1e88e5;
+        }
+        
+        .add-property-btn {
+            display: block;
+            margin-top: 15px;
+            background-color: #7fc29b;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+        
+        .add-property-btn:hover {
+            background-color: #63a780;
+        }
+        /* Booking Management Card */
+        
+        .booking-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .booking-list li {
+            background-color: #f7fafc;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .booking-list li:last-child {
+            margin-bottom: 0;
+        }
+        
+        .booking-info {
+            flex-grow: 1;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .booking-info strong {
+            color: #2d3748;
+        }
+        
+        .booking-status {
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        
+        .booking-status.pending {
+            background-color: #ffe0b2;
+            color: #ff9800;
+        }
+        
+        .booking-status.confirmed {
+            background-color: #e6fffa;
+            color: #38a169;
+        }
+        
+        .booking-status.rejected {
+            background-color: #ffcdd2;
+            color: #f44336;
+        }
+        
+        .booking-status.cancelled {
+            background-color: #e0e0e0;
+            color: #757575;
+        }
+        
+        .booking-status.completed {
+            background-color: #bbdefb;
+            color: #2196f3;
+        }
+        
+        .booking-actions-mini {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .booking-actions-mini a,
+        .booking-actions-mini button {
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s ease;
+        }
+        
+        .booking-actions-mini .confirm-booking {
+            background-color: #dcedc8;
+            color: #8bc34a;
+        }
+        
+        .booking-actions-mini .confirm-booking:hover {
+            background-color: #c5e1a5;
+        }
+        
+        .booking-actions-mini .reject-booking {
+            background-color: #ffcdd2;
+            color: #f44336;
+        }
+        
+        .booking-actions-mini .reject-booking:hover {
+            background-color: #ef9a9a;
+        }
+        
+        .booking-actions-mini .message-tenant {
+            background-color: #e0f2f7;
+            color: #00bcd4;
+        }
+        
+        .booking-actions-mini .message-tenant:hover {
+            background-color: #b2ebf2;
+        }
+        /* Maintenance Requests Card (reusing styles from tenant dashboard, but with different data) */
+        
+        .maintenance-request-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .maintenance-request-list li {
+            background-color: #f7fafc;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .maintenance-request-list h4 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            color: #2d3748;
+        }
+        
+        .maintenance-request-list p {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .maintenance-request-list .status-priority {
+            font-size: 12px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .maintenance-request-list .status-priority span {
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+        
+        .maintenance-request-list .status-priority .status-new {
+            background-color: #ffe0b2;
+            color: #ff9800;
+        }
+        
+        .maintenance-request-list .status-priority .status-in_progress {
+            background-color: #bbdefb;
+            color: #2196f3;
+        }
+        
+        .maintenance-request-list .status-priority .status-completed {
+            background-color: #e6fffa;
+            color: #38a169;
+        }
+        
+        .maintenance-request-list .status-priority .status-rejected {
+            background-color: #ffcdd2;
+            color: #f44336;
+        }
+        
+        .maintenance-request-list .status-priority .priority-low {
+            background-color: #e8f5e9;
+            color: #4caf50;
+        }
+        
+        .maintenance-request-list .status-priority .priority-medium {
+            background-color: #fffde7;
+            color: #ffc107;
+        }
+        
+        .maintenance-request-list .priority-high {
+            background-color: #ffe0b2;
+            color: #ff9800;
+        }
+        
+        .maintenance-request-list .priority-urgent {
+            background-color: #ffcdd2;
+            color: #f44336;
+        }
+        
+        .maintenance-actions-mini {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .maintenance-actions-mini a,
+        .maintenance-actions-mini button {
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s ease;
+        }
+        
+        .maintenance-actions-mini .mark-in-progress {
+            background-color: #e0f2f7;
+            color: #00bcd4;
+        }
+        
+        .maintenance-actions-mini .mark-completed {
+            background-color: #dcedc8;
+            color: #8bc34a;
+        }
+        
+        .maintenance-actions-mini .reject-request {
+            background-color: #ffcdd2;
+            color: #f44336;
+        }
+        
+        .maintenance-actions-mini .message-tenant {
+            background-color: #ffe0b2;
+            color: #ff9800;
+        }
+        /* Recent Chats Card (reusing styles) */
+        
+        .recent-chats-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .recent-chats-list li {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .recent-chats-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .recent-chats-list li:hover {
+            background-color: #edf2f7;
+        }
+        
+        .recent-chats-list a {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .chat-list-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #cbd5e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            color: #718096;
+            overflow: hidden;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .chat-list-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .chat-item-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-item-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 15px;
+        }
+        
+        .chat-item-property {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 2px;
+        }
+        
+        .chat-item-message {
+            font-size: 14px;
+            color: #4a5568;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 5px;
+        }
+        
+        .chat-item-timestamp {
+            font-size: 10px;
+            color: #a0aec0;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+        /* Payment Tracking Card (Placeholder) */
+        
+        .payment-status-info {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .payment-action-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+            text-align: center;
+            width: fit-content;
+            margin-top: 15px;
+        }
+        
+        .payment-action-btn:hover {
+            background-color: #0056b3;
+        }
+        /* Message for empty states */
+        
+        .empty-state-message {
+            font-size: 15px;
+            color: #718096;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header Section (using your combined CSS header structure) -->
+    <header class="header">
+        <div class="header-left">
+            <div class="header-left" onclick="window.location.href='{% url 'users:home' %}'" style="cursor: pointer;">
+                <span class="logo-text">RentUrHouse Owner</span>
+            </div>
+            <div class="header-middle">
+                {# Add your main navigation links here if you have any #}
+            </div>
+            <div class="profile-menu">
+                <a href="#" id="menu-button">
+                    <img class="logo-icon" src="{% static 'img/Menu Button.svg' %}" alt="Menu" width="120" height="40">
+                </a>
+                <div class="profile-dropdown" id="menu-dropdown">
+                    {% if user.is_authenticated %}
+                    <a href="#">My Profile</a>
+                    <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
+                </div>
+            </div>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="dashboard-welcome">
+            <h1>Welcome, {{ user.full_name|default:user.username|capfirst }}!</h1>
+            <p>Here's an overview of your owned properties and management tasks.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-column">
+                <!-- My Properties Card -->
+                <div class="dashboard-card">
+                    <h2>My Properties</h2>
+                    {% if owner_properties %}
+                    <ul class="property-list">
+                        {% for property in owner_properties %}
+                        <li>
+                            {% if property.main_image %}
+                            <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="property-image-tiny"> {% else %}
+                            <img src="https://placehold.co/70x50/e2e8f0/718096?text=No+Img" alt="No Image" class="property-image-tiny"> {% endif %}
+                            <div class="property-info-tiny">
+                                <h3>{{ property.title }}</h3>
+                                <p>{{ property.address|truncatechars:40 }}</p>
+                                <p>
+                                    RM {{ property.rent }} / Month | {{ property.available_spots }} / {{ property.total_spots }} Rooms Left {% if property.available_spots > 0 %}
+                                    <span class="status-label status-vacant">Vacant</span> {% else %}
+                                    <span class="status-label status-occupied">Occupied</span> {% endif %}
+                                </p>
+                            </div>
+                            <div class="property-actions-tiny">
+                                <a href="{% url 'users:property_detail' pk=property.pk %}" class="view-listing">View Listing</a>
+                                <a href="#" class="edit-listing">Edit</a> {# Placeholder #}
+                                <a href="#" class="view-bookings">Bookings</a> {# Placeholder #}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="#" class="add-property-btn">Add New Property</a> {# Placeholder #} {% else %}
+                    <p class="empty-state-message">You don't have any properties listed yet.</p>
+                    <a href="#" class="add-property-btn">Add Your First Property</a> {# Placeholder #} {% endif %}
+                </div>
+            </div>
+
+            <!-- Pending Booking Requests Card -->
+            <div class="dashboard-column">
+                <div class="dashboard-card">
+                    <h2>Pending Booking Requests</h2>
+                    {% if pending_bookings %}
+                    <ul class="booking-list">
+                        {% for booking in pending_bookings %}
+                        <li>
+                            <div class="booking-info">
+                                <strong>{{ booking.property.title }}</strong> by {{ booking.tenant.full_name|default:booking.tenant.username }}<br> Move-in: {{ booking.start_date|date:"M d, Y" }}<br> Spots: {{ booking.spots_booked }}
+                            </div>
+                            <span class="booking-status {{ booking.status }}">
+                                    {{ booking.status }}
+                                </span>
+                            <div class="booking-actions-mini">
+                                {# These buttons would link to views that confirm/reject bookings #}
+                                <form method="post" action="#"> {# Action to confirm_booking view #} {% csrf_token %}
+                                    <input type="hidden" name="booking_id" value="{{ booking.pk }}">
+                                    <input type="hidden" name="action" value="confirm">
+                                    <button type="submit" class="confirm-booking">Confirm</button>
+                                </form>
+                                <form method="post" action="#"> {# Action to reject_booking view #} {% csrf_token %}
+                                    <input type="hidden" name="booking_id" value="{{ booking.pk }}">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="reject-booking">Reject</button>
+                                </form>
+                                <a href="{% url 'users:chat_with_owner' property_pk=booking.property.pk owner_pk=booking.tenant.pk %}" class="message-tenant">Message Tenant</a>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="empty-state-message">No pending booking requests.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Maintenance Requests Card -->
+                <div class="dashboard-card">
+                    <h2>Maintenance Requests</h2>
+                    {% if owner_maintenance_requests %}
+                    <ul class="maintenance-request-list">
+                        {% for req in owner_maintenance_requests %}
+                        <li>
+                            <h4>{{ req.issue_title }} (for {{ req.property.title }})</h4>
+                            <p>Submitted by: {{ req.submitted_by.full_name|default:req.submitted_by.username }}</p>
+                            <p>{{ req.issue_description|truncatechars:100 }}</p>
+                            <div class="status-priority">
+                                <span class="status-{{ req.status }}">{{ req.get_status_display }}</span>
+                                <span class="priority-{{ req.priority }}">{{ req.get_priority_display }} Priority</span>
+                            </div>
+                            <small style="display: block; text-align: right; color: #a0aec0;">Submitted: {{ req.submitted_date|date:"F d, Y P" }}</small>
+                            <div class="maintenance-actions-mini">
+                                {# These buttons would link to views that update maintenance status #}
+                                <a href="#" class="mark-in-progress">In Progress</a> {# Placeholder #}
+                                <a href="#" class="mark-completed">Completed</a> {# Placeholder #}
+                                <a href="#" class="reject-request">Reject</a> {# Placeholder #}
+                                <a href="{% url 'users:chat_with_owner' property_pk=req.property.pk owner_pk=req.submitted_by.pk %}" class="message-tenant">Message Tenant</a>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="empty-state-message">No maintenance requests for your properties.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Chats Card (reusing template logic, slightly adapted) -->
+            <div class="dashboard-column">
+                <div class="dashboard-card">
+                    <h2>Recent Chats</h2>
+                    {% if recent_chats_data %}
+                    <ul class="recent-chats-list">
+                        {% for chat in recent_chats_data %}
+                        <li>
+                            <a href="{{ chat.link }}">
+                                <div class="chat-list-avatar">
+                                    {% if chat.property.main_image %}
+                                    <img src="{{ chat.property.main_image.url }}" alt="{{ chat.property.title }}"> {% else %} 👤 {% endif %}
+                                </div>
+                                <div class="chat-item-content">
+                                    <div class="chat-item-name">{{ chat.other_user.full_name|default:chat.other_user.username }}</div>
+                                    <div class="chat-item-property">{{ chat.property.title }}</div>
+                                    <div class="chat-item-message">
+                                        {% if chat.last_message_text|length > 30 %} {{ chat.last_message_text|slice:":30" }}... {% else %} {{ chat.last_message_text }} {% endif %}
+                                    </div>
+                                </div>
+                                <div class="chat-item-timestamp">{{ chat.last_message_timestamp|date:"P" }}</div>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="empty-state-message">No recent chats for your properties.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Payment Tracking Card (Placeholder) -->
+                <div class="dashboard-card">
+                    <h2>Payment Tracking</h2>
+                    <p class="payment-status-info">No upcoming payments to track for tenants.</p>
+                    <p class="empty-state-message">Payment history and detailed tracking coming soon.</p>
+                    <a href="#" class="payment-action-btn">View All Payments</a> {# Placeholder #}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Include the chat popup partial (if you added it globally) #} {% if user.is_authenticated %} {% include 'components/chat_popup.html' %} {% endif %}
+
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+
+</html>

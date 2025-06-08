@@ -1,11 +1,10 @@
-{% load static %}
+{# users/templates/users/chat_page.html #} {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat with {{ owner.full_name|default:owner.username }} | RentUrHouse</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Your combined CSS #}
     <script src="{% static 'script/main.js' %}"></script>
@@ -27,10 +26,11 @@
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             display: flex;
+            /* Key for flexbox layout */
             width: 100%;
             max-width: 1100px;
             /* Wider for chat */
-            height: 70vh;
+            height: 900;
             /* Fixed height for chat area */
             overflow: hidden;
             border: 1px solid #e0e0e0;
@@ -38,10 +38,19 @@
         
         .chat-left-panel {
             flex: 2;
-            /* Chat area */
+            /* Default flex-grow when right panel is present */
             display: flex;
             flex-direction: column;
             border-right: 1px solid #eef2f6;
+            /* Default border when right panel is present */
+        }
+        /* NEW: Class for left panel when it takes full width */
+        
+        .chat-left-panel.full-width-chat {
+            flex: 1;
+            /* Take all available space */
+            border-right: none;
+            /* Remove the right border */
         }
         
         .chat-right-panel {
@@ -261,11 +270,14 @@
                 border-right: none;
                 border-bottom: 1px solid #eef2f6;
                 flex: 1.5;
-                /* Chat takes more space when stacked */
             }
             .chat-right-panel {
                 flex: 1;
-                /* Property summary takes less space when stacked */
+            }
+            /* When stacked, full-width-chat might not be strictly needed for flex,
+               but still useful for explicit border removal if it was applied elsewhere. */
+            .chat-left-panel.full-width-chat {
+                border-right: none;
             }
         }
         
@@ -315,16 +327,19 @@
     <!-- Header Section (similar to other pages) -->
     <header class="header">
         <div class="header-left">
-            <a href="{% url 'users:property_detail' pk=property.pk %}" class="back-link">
-                <!-- SVG for back arrow icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>                Room Details
+            {# Dynamic Back Button based on user role and history #} {% if request.user.role == 'tenant' %} {# Tenant always goes to dashboard #}
+            <a href="{% url 'tenant:tenant_home' %}" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>                Dashboard
             </a>
+            {% else %} {# Other roles default to Room Details, but JS can change to "Previous Page" #}
+            <a href="{% url 'users:property_detail' pk=property.pk %}" class="back-link dynamic-back-link" id="dynamicBackLink" data-default-text="Room Details" data-history-text="Back to Previous Page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <span id="backLinkText">Room Details</span> {# Text inside span to be changed by JS #}
+            </a>
+            {% endif %}
         </div>
-        <div class="page-title">Contact {{ owner.full_name|default:owner.username }}</div>
+        <div class="page-title">Contact {{ target_user.full_name|default:target_user.username }}</div>
         <div class="header-right">
-            <a href="#">
-                <img class="logo-icon" src="{% static 'img/Chat Button.svg' %}" alt="Chat" width="40" height="40">
-            </a>
             <div class="profile-menu">
                 <a href="#" id="menu-button">
                     <img class="logo-icon" src="{% static 'img/Menu Button.svg' %}" alt="Menu" width="120" height="40">
@@ -333,18 +348,17 @@
                     {% if user.is_authenticated %}
                     <a href="#">My Profile</a>
                     <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
-
                 </div>
             </div>
         </div>
     </header>
-
     <!-- Main Chat Container -->
     <div class="chat-container">
         <div class="chat-card">
-            <div class="chat-left-panel">
+            {# Add class 'full-width-chat' to left panel if current user is NOT the property owner #}
+            <div class="chat-left-panel {% if not is_current_user_owner %}full-width-chat{% endif %}">
                 <div class="chat-header">
-                    <h3>Contact {{ owner.full_name|default:owner.username }}</h3>
+                    <h3>Contact {{ target_user.full_name|default:target_user.username }}</h3>
                     <p>Typically responds within an hour</p>
                 </div>
 
@@ -368,6 +382,7 @@
                 </form>
             </div>
 
+            {# NEW: Conditionally render chat-right-panel ONLY if current user is the owner #} {% if not is_current_user_owner %}
             <div class="chat-right-panel">
                 <div class="property-summary-card">
                     <div class="image-container">
@@ -388,40 +403,15 @@
                         <p>Move out date: DD/MM/YYYY</p>
 
                         <p>Select unit: [Dropdown]</p> {# Placeholder: This likely needs specific booking logic #}
-                        <p>Payment method: [Dropdown]</p> {# Placeholder: This likely needs specific booking logic #} {% if property.available_spots > 0 %}
-                        <a href="{% url 'users:book_property' pk=property.pk %}" class="action-button book-now">Book now</a> {% else %}
-                        <button class="action-button" disabled>Fully Booked</button> {% endif %}
-                        <button type="button" id="requestViewingBtn" class="action-button chat-owner">Request Viewing</button>
+                        <p>Payment method: [Dropdown]</p> {# Placeholder: This likely needs specific booking logic #}
+                        <button class="action-button book-now">Confirm booking</button> {# Placeholder for owner to confirm #}
+                        <button class="action-button chat-owner" id="requestViewingBtn">Request Viewing</button> {# Re-added ID for JS #}
                     </div>
                 </div>
             </div>
+            {% endif %} {# End of is_current_user_owner check #}
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-
-            // --- NEW: Auto-type Request Viewing message ---
-            const chatInput = document.querySelector('.chat-message-input'); // Selects the <textarea>
-            const requestViewingBtn = document.getElementById('requestViewingBtn');
-            const chatSendBtn = document.querySelector('.chat-send-btn'); // Assuming this is your send button
-
-            if (requestViewingBtn && chatInput && chatSendBtn) {
-                requestViewingBtn.addEventListener('click', function() {
-                    const predefinedMessage = "Hi, I'm interested in viewing this property. Could we schedule a viewing soon?";
-                    chatInput.value = predefinedMessage;
-
-                    // Optional: Automatically send the message after typing
-                    // This simulates a click on the send button, which will trigger the form submission.
-                    // Be aware that this will immediately send the message without user confirmation.
-                    chatSendBtn.click();
-
-                    // Alternatively, just populate the field and let the user click send:
-                    // No chatSendBtn.click() here if you want user to manually send.
-                });
-            }
-        });
-    </script>
 </body>
 
 </html>

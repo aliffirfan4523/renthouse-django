@@ -1,0 +1,13 @@
+{# users/templates/components/chat_popup.html #} {% load static %} {# Need this for {% url %} if you define data-api-url here #} {# This partial template displays the chat popup structure. #} {# and that `users:recent_chats_api` URL is available. #}
+
+<div id="chatPopup" class="chat-popup-container" data-api-url="{% url 'users:recent_chats_api' %}">
+    <div class="chat-popup-header">
+        Recent Chats
+        <button class="close-btn">&times;</button>
+    </div>
+    <div class="chat-list">
+        {# Chat list items will be dynamically loaded here by JavaScript #}
+        <div class="chat-list-loading" style="text-align: center; padding: 20px; color: #718096;">Loading chats...</div>
+        <div class="chat-list-empty" style="display: none; text-align: center; padding: 20px; color: #718096;">No recent chats.</div>
+    </div>
+</div>
