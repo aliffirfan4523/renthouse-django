@@ -501,13 +501,14 @@
 <body>
     <!-- Header Section (using your combined CSS header structure) -->
     <header class="header">
-        <div class="header-left">
-            <div class="header-left" onclick="window.location.href='{% url 'users:home' %}'" style="cursor: pointer;">
-                <span class="logo-text">RentUrHouse Owner</span>
-            </div>
-            <div class="header-middle">
-                {# Add your main navigation links here if you have any #}
-            </div>
+        <div class="header-left" onclick="window.location.href='{% url 'users:home' %}'" style="cursor: pointer;">
+            <img class="logo-icon" src="{% static 'img/Logo.svg' %}" alt="Logo" width="40" height="40">
+            <span class="logo-text">RentUrHouse Owner</span>
+        </div>
+        <div class="header-middle">
+            {# Add your main navigation links here if you have any #}
+        </div>
+        <div class="header-right">
             <div class="profile-menu">
                 <a href="#" id="menu-button">
                     <img class="logo-icon" src="{% static 'img/Menu Button.svg' %}" alt="Menu" width="120" height="40">
@@ -516,8 +517,10 @@
                     {% if user.is_authenticated %}
                     <a href="#">My Profile</a>
                     <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
+
                 </div>
             </div>
+        </div>
     </header>
 
     <div class="dashboard-container">
@@ -536,7 +539,7 @@
                         {% for property in owner_properties %}
                         <li>
                             {% if property.main_image %}
-                            <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="property-image-tiny"> {% else %}
+                            <img src="{{ property.main_image }}" alt="{{ property.title }}" class="property-image-tiny"> {% else %}
                             <img src="https://placehold.co/70x50/e2e8f0/718096?text=No+Img" alt="No Image" class="property-image-tiny"> {% endif %}
                             <div class="property-info-tiny">
                                 <h3>{{ property.title }}</h3>
