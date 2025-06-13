@@ -1,0 +1,42 @@
+<div id="filterModal" class="filter-modal" onclick="if (event.target === this) this.classList.remove('show');">
+    <div class="filter-form-content">
+        <h2>Advanced Filters</h2>
+        <form action="{% url 'users:home' %}" method="get">
+            <div class="form-group">
+                <label for="id_room_count">Number of Rooms:</label>
+                <input type="number" id="id_room_count" name="room_count" min="1" value="{{ current_room_count }}">
+            </div>
+            <div class="form-group">
+                <label for="id_house_type">Property Type:</label>
+                <select id="id_house_type" name="house_type">
+                    <option value="">Any Type</option>
+                    {% for type_choice in property_type_choices %}
+                        <option value="{{ type_choice.0 }}" {% if current_house_type == type_choice.0 %}selected{% endif %}>{{ type_choice.1 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_gender_preference">Gender Preference:</label> {# NEW GENDER FILTER LABEL #}
+                <select id="id_gender_preference" name="gender_preference"> {# NEW GENDER FILTER SELECT #}
+                    <option value="" disabled>Select one</option>
+                    {% for gender_choice in property_gender_choices %} {# Assumes property_gender_choices is passed from view #}
+                        <option value="{{ gender_choice.0 }}" {% if current_gender_preference == gender_choice.0 %}selected{% endif %}>{{ gender_choice.1 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_min_rent">Minimum Rent:</label>
+                <input type="number" id="id_min_rent" name="min_rent" min="0" value="{{ request.GET.min_rent }}">
+            </div>
+            <div class="form-group">
+                <label for="id_max_rent">Maximum Rent:</label>
+                <input type="number" id="id_max_rent" name="max_rent" min="0" value="{{ request.GET.max_rent }}">
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="clear-filters" onclick="window.location.href='{% url 'users:home' %}';">Clear Filters</button>
+                <button type="submit" class="apply-filters">Apply Filters</button>
+            </div>
+        </form>
+    </div>
+</div>

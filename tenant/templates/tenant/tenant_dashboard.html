@@ -7,11 +7,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tenant Dashboard | RentUrHouse</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Your combined CSS #}
-    <script src="{% static 'script/main.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/main_app.css' %}"> {# Your combined CSS #}
+    <script src="{% static 'js/main.js' %}"></script>
     <style>
+        /* Base styles from previous version, kept for continuity */
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header Styles (Keeping consistent with your existing header) */
+        .header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background-color: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-radius: 0 0 10px 10px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+            color: #4a5568;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        .profile-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            min-width: 150px;
+            z-index: 100;
+        }
+
+        .profile-dropdown a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .profile-dropdown a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .header-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+            color: #4a5568;
+        }
+
+        .header-button.profile {
+            background-color: #f1e4fc;
+            color: #9c27b0;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
         /* Dashboard Specific Styles */
-        
+
         .dashboard-container {
             display: flex;
             flex-direction: column;
@@ -22,7 +131,7 @@
             /* Space between sections */
             flex-grow: 1;
         }
-        
+
         .dashboard-welcome {
             background-color: white;
             padding: 25px;
@@ -30,24 +139,24 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
             text-align: center;
         }
-        
+
         .dashboard-welcome h1 {
             color: #2d3748;
             font-size: 28px;
             margin-bottom: 10px;
         }
-        
+
         .dashboard-welcome p {
             color: #718096;
             font-size: 16px;
         }
-        
+
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
         }
-        
+
         .dashboard-card {
             background-color: white;
             padding: 25px;
@@ -56,7 +165,7 @@
             display: flex;
             flex-direction: column;
         }
-        
+
         .dashboard-card h2 {
             color: #2d3748;
             font-size: 22px;
@@ -67,24 +176,24 @@
             padding-bottom: 10px;
         }
         /* Current Rental Card */
-        
+
         .current-rental-details h3 {
             margin: 0;
             font-size: 18px;
             color: #4a5568;
             margin-bottom: 10px;
         }
-        
+
         .current-rental-details p {
             margin: 5px 0;
             font-size: 15px;
             color: #718096;
         }
-        
+
         .current-rental-details strong {
             color: #2d3748;
         }
-        
+
         .current-rental-details .contact-link {
             display: inline-block;
             margin-top: 15px;
@@ -96,18 +205,18 @@
             font-weight: 500;
             transition: background-color 0.2s ease;
         }
-        
+
         .current-rental-details .contact-link:hover {
             background-color: #63a780;
         }
         /* My Bookings Card */
-        
+
         .booking-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        
+
         .booking-list li {
             background-color: #f7fafc;
             padding: 12px;
@@ -121,21 +230,21 @@
             gap: 5px;
             border: 1px solid #e0e0e0;
         }
-        
+
         .booking-list li:last-child {
             margin-bottom: 0;
         }
-        
+
         .booking-info {
             flex-grow: 1;
             font-size: 14px;
             color: #4a5568;
         }
-        
+
         .booking-info strong {
             color: #2d3748;
         }
-        
+
         .booking-status {
             padding: 4px 8px;
             border-radius: 5px;
@@ -143,83 +252,86 @@
             font-weight: 600;
             text-transform: capitalize;
         }
-        
+
         .booking-status.pending {
             background-color: #ffe0b2;
             color: #ff9800;
         }
         /* Orange */
-        
+
         .booking-status.confirmed {
             background-color: #e6fffa;
             color: #38a169;
         }
         /* Green */
-        
+
         .booking-status.rejected {
             background-color: #ffcdd2;
             color: #f44336;
         }
         /* Red */
-        
+
         .booking-status.cancelled {
             background-color: #e0e0e0;
             color: #757575;
         }
         /* Gray */
-        
+
         .booking-status.completed {
             background-color: #bbdefb;
             color: #2196f3;
         }
         /* Blue */
-        
+
         .booking-actions-mini {
             display: flex;
             gap: 5px;
             margin-top: 5px;
             /* For wrapped items */
         }
-        
-        .booking-actions-mini a {
+
+        .booking-actions-mini a,
+        .booking-actions-mini button { /* Apply styles to buttons too */
             font-size: 12px;
             padding: 5px 10px;
             border-radius: 5px;
             text-decoration: none;
             font-weight: 500;
             transition: background-color 0.2s ease;
+            border: none; /* Remove default button border */
+            cursor: pointer;
         }
-        
+
         .booking-actions-mini .view-notice {
             background-color: #bbdefb;
             color: #2196f3;
         }
-        
+
         .booking-actions-mini .view-notice:hover {
             background-color: #90caf9;
         }
-        
+
         .booking-actions-mini .cancel-booking {
             background-color: #ffcdd2;
             color: #f44336;
         }
-        
+
         .booking-actions-mini .cancel-booking:hover {
             background-color: #ef9a9a;
         }
         /* Maintenance Requests Card */
-        
+
         .maintenance-form-section .form-group {
             margin-bottom: 15px;
         }
-        
+
         .maintenance-form-section label {
             display: block;
             font-weight: 500;
             color: #4a5568;
             margin-bottom: 5px;
         }
-        
+
         .maintenance-form-section input[type="text"],
         .maintenance-form-section textarea,
         .maintenance-form-section select {
@@ -231,11 +343,11 @@
             box-sizing: border-box;
             color: #2d3748;
         }
-        
+
         .maintenance-form-section textarea {
             resize: vertical;
         }
-        
+
         .maintenance-form-section button {
             background-color: #7fc29b;
             color: white;
@@ -247,17 +359,17 @@
             transition: background-color 0.2s ease;
             margin-top: 10px;
         }
-        
+
         .maintenance-form-section button:hover {
             background-color: #63a780;
         }
-        
+
         .maintenance-request-list {
             margin-top: 20px;
             list-style: none;
             padding: 0;
         }
-        
+
         .maintenance-request-list li {
             background-color: #f7fafc;
             padding: 12px;
@@ -265,79 +377,79 @@
             margin-bottom: 10px;
             border: 1px solid #e0e0e0;
         }
-        
+
         .maintenance-request-list h4 {
             margin: 0 0 5px 0;
             font-size: 16px;
             color: #2d3748;
         }
-        
+
         .maintenance-request-list p {
             margin: 0 0 5px 0;
             font-size: 14px;
             color: #4a5568;
         }
-        
+
         .maintenance-request-list .status-priority {
             font-size: 12px;
             display: flex;
             gap: 10px;
         }
-        
+
         .maintenance-request-list .status-priority span {
             padding: 3px 6px;
             border-radius: 4px;
             font-weight: 500;
             text-transform: capitalize;
         }
-        
+
         .maintenance-request-list .status-priority .status-new {
             background-color: #ffe0b2;
             color: #ff9800;
         }
-        
+
         .maintenance-request-list .status-priority .status-in_progress {
             background-color: #bbdefb;
             color: #2196f3;
         }
-        
+
         .maintenance-request-list .status-priority .status-completed {
             background-color: #e6fffa;
             color: #38a169;
         }
-        
+
         .maintenance-request-list .status-priority .status-rejected {
             background-color: #ffcdd2;
             color: #f44336;
         }
-        
+
         .maintenance-request-list .status-priority .priority-low {
             background-color: #e8f5e9;
             color: #4caf50;
         }
-        
+
         .maintenance-request-list .status-priority .priority-medium {
             background-color: #fffde7;
             color: #ffc107;
         }
-        
+
         .maintenance-request-list .status-priority .priority-high {
             background-color: #ffe0b2;
             color: #ff9800;
         }
-        
+
         .maintenance-request-list .priority-urgent {
             background-color: #ffcdd2;
             color: #f44336;
         }
         /* Recent Chats Card */
-        
+
         .recent-chats-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        
+
         .recent-chats-list li {
             display: flex;
             align-items: center;
@@ -346,15 +458,15 @@
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
-        
+
         .recent-chats-list li:last-child {
             border-bottom: none;
         }
-        
+
         .recent-chats-list li:hover {
             background-color: #edf2f7;
         }
-        
+
         .recent-chats-list a {
             /* Ensure the link itself fills the space */
             display: flex;
@@ -363,7 +475,7 @@
             text-decoration: none;
             color: inherit;
         }
-        
+
         .chat-list-avatar {
             width: 40px;
             height: 40px;
@@ -378,31 +490,31 @@
             margin-right: 10px;
             flex-shrink: 0;
         }
-        
+
         .chat-list-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        
+
         .chat-item-content {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
-        
+
         .chat-item-name {
             font-weight: 600;
             color: #2d3748;
             font-size: 15px;
         }
-        
+
         .chat-item-property {
             font-size: 12px;
             color: #718096;
             margin-top: 2px;
         }
-        
+
         .chat-item-message {
             font-size: 14px;
             color: #4a5568;
@@ -411,7 +523,7 @@
             text-overflow: ellipsis;
             margin-top: 5px;
         }
-        
+
         .chat-item-timestamp {
             font-size: 10px;
             color: #a0aec0;
@@ -419,14 +531,14 @@
             flex-shrink: 0;
         }
         /* Payment History Card */
-        
+
         .payment-status {
             font-size: 18px;
             font-weight: 600;
             color: #2d3748;
             margin-bottom: 15px;
         }
-        
+
         .payment-action-btn {
             background-color: #007bff;
             color: white;
@@ -440,12 +552,12 @@
             text-align: center;
             width: fit-content;
         }
-        
+
         .payment-action-btn:hover {
             background-color: #0056b3;
         }
         /* Message for empty states */
-        
+
         .empty-state-message {
             font-size: 15px;
             color: #718096;
@@ -453,7 +565,7 @@
             padding: 20px;
         }
         /* Responsive */
-        
+
         @media (max-width: 1024px) {
             .dashboard-container {
                 padding: 15px;
@@ -467,7 +579,7 @@
                 margin-bottom: 15px;
             }
         }
-        
+
         @media (max-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -477,7 +589,7 @@
                 font-size: 24px;
             }
         }
-        
+
         @media (max-width: 480px) {
             .dashboard-container {
                 padding: 10px;
@@ -504,6 +616,97 @@
                 margin-top: 10px;
             }
         }
+
+        /* Custom Modal Styles */
+        .modal {
+            display: none; /* Hidden by default - FIX applied here */
+            position: fixed; /* Stay in place */
+            z-index: 2000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto; /* Centered */
+            padding: 30px;
+            border: 1px solid #888;
+            width: 90%; /* Could be more responsive */
+            max-width: 400px; /* Max width */
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: fadeIn 0.3s ease-out; /* Simple fade-in animation */
+            text-align: center;
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+
+        .modal-buttons .confirm-btn {
+            background-color: #f44336; /* Red for destructive action */
+            color: white;
+        }
+
+        .modal-buttons .confirm-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .modal-buttons .cancel-btn {
+            background-color: #e0e0e0; /* Light gray */
+            color: #555;
+        }
+
+        .modal-buttons .cancel-btn:hover {
+            background-color: #ccc;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -511,7 +714,7 @@
     <!-- Header Section (using your combined CSS header structure) -->
     <header class="header">
         <div class="header-left" onclick="window.location.href='{% url 'users:home' %}'" style="cursor: pointer;">
-            <span class="logo-icon"><img class="logo-icon" src="{% static 'img/Logo.svg' %}" alt="Chat" width="40" height="40"></span>
+            <span class="logo-icon"><img class="logo-icon" src="{% static 'img/Logo.svg' %}" alt="RentUrHouse Logo" width="40" height="40"></span>
             <span class="logo-text" style="color: {{ logo_text_color }};">RentUrHouse</span>
         </div>
         <div class="header-middle">
@@ -529,7 +732,6 @@
                     {% if user.is_authenticated %}
                     <a href="#">My Profile</a>
                     <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
-
                 </div>
             </div>
         </div>
@@ -552,13 +754,14 @@
                         <p><strong>Address:</strong> {{ current_rental.property.address|linebreaksbr }}</p>
                         <p><strong>Monthly Rent:</strong> RM {{ current_rental.property.rent }}</p>
                         <p><strong>Move-in Date:</strong> {{ current_rental.start_date|date:"F d, Y" }}</p>
-                        <p><strong>Move-out Date:</strong> {{ current_rental.end_date|date:"F d, Y" }}</p>
+
                         <p><strong>Owner:</strong> {{ current_rental.property.owner.full_name|default:current_rental.property.owner.username }}</p>
-                        <a href="{% url 'users:chat_with_user' property_pk=current_rental.property.pk other_user_pk=current_rental.property.owner.pk %}" class="contact-link">Contact Owner</a> {# <a href="#" class="contact-link">View Lease Agreement</a>                        #}
+                        <a href="{% url 'users:chat_with_user' property_pk=current_rental.property.pk other_user_pk=current_rental.property.owner.pk %}" class="contact-link">Contact Owner</a>
                     </div>
                     {% else %}
                     <p class="empty-state-message">You do not have an active confirmed rental.</p>
-                    <a href="{% url 'users:home' %}" class="contact-link" style="text-align: center;">Find a Property</a> {% endif %}
+                    <a href="{% url 'users:home' %}" class="contact-link" style="text-align: center;">Find a Property</a>
+                    {% endif %}
                 </div>
 
                 <!-- My Bookings Card -->
@@ -569,16 +772,19 @@
                         {% for booking in all_bookings %}
                         <li>
                             <div class="booking-info">
-                                <strong>{{ booking.property.title }}</strong><br> {{ booking.start_date|date:"M d, Y" }} - {{ booking.end_date|date:"M d, Y" }}<br> Spots Booked: {{ booking.spots_booked }}
+                                <strong>{{ booking.property.title }}</strong><br> {{ booking.start_date|date:"M d, Y" }}<br> Spots Booked: {{ booking.spots_booked }}
                             </div>
                             <span class="booking-status {{ booking.status }}">
-                                    {{ booking.status }}
-                                </span>
+                                {{ booking.status }}
+                            </span>
                             <div class="booking-actions-mini">
                                 {% if booking.status == 'confirmed' or booking.status == 'pending' %}
-                                <a href="{% url 'users:move_in_notice' booking_pk=booking.pk %}" class="view-notice">View Notice</a> {% if booking.status == 'pending' or booking.status == 'confirmed' %} {# Link to a view to cancel booking, or a JS confirmation
-                                #}
-                                <a href="#" class="cancel-booking">Cancel</a> {% endif %} {% endif %}
+                                <a href="{% url 'tenant:move_in_notice' booking_pk=booking.pk %}" class="view-notice">View Notice</a>
+                                {% if booking.status == 'pending' or booking.status == 'confirmed' %}
+                                {# Changed href to a dummy value, will be set by JS #}
+                                <button type="button" class="cancel-booking" data-booking-id="{{ booking.pk }}">Cancel</button>
+                                {% endif %}
+                                {% endif %}
                             </div>
                         </li>
                         {% endfor %}
@@ -607,7 +813,8 @@
                                 {{ field.label_tag }} {{ field }} {% if field.help_text %}
                                 <small class="text-muted">{{ field.help_text }}</small> {% endif %} {% if field.errors %}
                                 <ul class="errorlist">{% for error in field.errors %}
-                                    <li>{{ error }}</li>{% endfor %}</ul>
+                                    <li>{{ error }}</li>{% endfor %}
+                                </ul>
                                 {% endif %}
                             </div>
                             {% endfor %}
@@ -644,8 +851,8 @@
                         <li>
                             <a href="{{ chat.link }}">
                                 <div class="chat-list-avatar">
-                                    {% if chat.property.main_image %}
-                                    <img src="{{ chat.property.main_image.url }}" alt="{{ chat.property.title }}"> {% else %} 👤 {% endif %}
+                                    {# You might want to display a user avatar here if available #}
+                                    👤
                                 </div>
                                 <div class="chat-item-content">
                                     <div class="chat-item-name">{{ chat.other_user.full_name|default:chat.other_user.username }}</div>
@@ -661,7 +868,8 @@
                     </ul>
                     {% else %}
                     <p class="empty-state-message">No recent chats.</p>
-                    <a href="{% url 'users:home' %}" class="contact-link" style="text-align: center;">Find Properties to Chat</a> {% endif %}
+                    <a href="{% url 'users:home' %}" class="contact-link" style="text-align: center;">Find Properties to Chat</a>
+                    {% endif %}
                 </div>
             </div>
 
@@ -677,9 +885,115 @@
         </div>
     </div>
 
-    {# Include the chat popup partial (if you added it globally) #} {% if user.is_authenticated %} {% include 'components/chat_popup.html' %} {% endif %}
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Confirm Cancellation</h2>
+            <p>Are you sure you want to cancel this booking?</p>
+            <div class="modal-buttons">
+                <button class="confirm-btn" id="confirmCancelBtn">Confirm</button>
+                <button class="cancel-btn" id="cancelModalBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    {# Hidden form for POST request cancellation #}
+    <form id="cancelBookingForm" method="post" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="booking_id" id="cancelBookingIdInput">
+    </form>
+
+    {# Include the chat popup partial (if you added it globally) #} {% if user.is_authenticated %} {% include 'partials/chat_popup.html' %} {% endif %}
 
     <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get modal elements
+            const modal = document.getElementById('confirmationModal');
+            const closeButton = document.querySelector('#confirmationModal .close-button'); // More specific selector
+            const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+            const cancelModalBtn = document.getElementById('cancelModalBtn');
+
+            // Get hidden form elements
+            const cancelBookingForm = document.getElementById('cancelBookingForm');
+            const cancelBookingIdInput = document.getElementById('cancelBookingIdInput');
+
+            let bookingToCancelId = null; // Variable to store the booking ID
+
+            // Function to show the modal
+            function showModal() {
+                modal.style.display = 'flex'; // Use flex to center
+            }
+
+            // Function to hide the modal
+            function hideModal() {
+                modal.style.display = 'none';
+                bookingToCancelId = null; // Clear the stored booking ID
+                cancelBookingIdInput.value = ''; // Clear the hidden input value
+            }
+
+            // Event listener for cancel booking buttons
+            document.querySelectorAll('.cancel-booking').forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault(); // Prevent default button behavior
+                    bookingToCancelId = this.dataset.bookingId; // Get booking ID from data-attribute
+                    showModal();
+                });
+            });
+
+            // Event listener for modal close button
+            if (closeButton) {
+                closeButton.addEventListener('click', hideModal);
+            }
+
+            // Event listener for modal's "Cancel" button
+            if (cancelModalBtn) {
+                cancelModalBtn.addEventListener('click', hideModal);
+            }
+
+            // Event listener for modal's "Confirm" button
+            if (confirmCancelBtn) {
+                confirmCancelBtn.addEventListener('click', function() {
+                    if (bookingToCancelId) {
+                        // Set the booking ID in the hidden form field
+                        cancelBookingIdInput.value = bookingToCancelId;
+                        // Set the form action to the correct URL for the booking ID
+                        cancelBookingForm.action = "{% url 'tenant:cancel_booking' booking_id=0 %}".replace('0', bookingToCancelId);
+                        // Submit the form as a POST request
+                        cancelBookingForm.submit();
+                    }
+                    hideModal(); // Hide modal after action (though page will redirect)
+                });
+            }
+
+            // Close modal if user clicks outside of it
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    hideModal();
+                }
+            });
+
+            // --- Profile Dropdown Logic (copied for consistency) ---
+            const menuButton = document.getElementById('menu-button');
+            const menuDropdown = document.getElementById('menu-dropdown');
+
+            if (menuButton && menuDropdown) {
+                menuButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation(); // Prevent document click from closing it immediately
+                    menuDropdown.classList.toggle('show');
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!menuDropdown.contains(event.target) && !menuButton.contains(event.target)) {
+                        menuDropdown.classList.remove('show');
+                    }
+                });
+            }
+            // --- End Profile Dropdown Logic ---
+        });
+    </script>
 </body>
 
 </html>

@@ -1,4 +1,4 @@
-{# components/chat_popup.html #} {% load static %} {# Need this for {% url %} if you define data-api-url here #} {# This partial template displays the chat popup structure. #} {# and that `users:recent_chats_api` URL is available. #}
+{# partials/chat_popup.html #} {% load static %} {# Need this for {% url %} if you define data-api-url here #} {# This partial template displays the chat popup structure. #} {# and that `users:recent_chats_api` URL is available. #}
 
 <div id="chatPopup" class="chat-popup-container" data-api-url="{% url 'users:recent_chats_api' %}">
     <div class="chat-popup-header">

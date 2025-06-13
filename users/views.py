@@ -1,236 +1,276 @@
+import json
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView,DetailView 
-from django.db.models import Count, Q
-from .models import Property,Booking, CustomUser,  ChatMessage # Import Booking
-from .forms import BookingForm, MessageForm # Import the new BookingForm
-from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin # For views that require login
-from django.contrib.auth.decorators import login_required # For function-based views
-from django.http import JsonResponse # NEW: Import JsonResponse for API
-from django.db.models import F, Q # Make sure F is imported
+from django.views.generic import ListView, DetailView
+from django.db.models import Q # Used for complex queries
+# IMPORTANT: Import AdditionalOccupant model
+from .models import Property, CustomUser, Booking, ChatMessage, AdditionalOccupant 
+# IMPORTANT: Ensure AdditionalOccupantFormSet is imported (from forms.py)
+from .forms import AdditionalOccupantFormSet, BookingForm, MessageForm 
+from django.contrib import messages # For Django messages framework
+from django.contrib.auth.mixins import LoginRequiredMixin # For class-based view login requirement
+from django.contrib.auth.decorators import login_required # For function-based view login requirement
+from django.urls import reverse # To dynamically get URL patterns
+from django.http import JsonResponse # For API responses
+from datetime import date # Import date for validation
+
+
+# --- HomePropertyListView ---
 class HomePropertyListView(ListView):
-    # This view will fetch data from the Property model
+    """
+    A view to display a list of available properties.
+    Supports searching by query and filtering by house type and gender preference.
+    """
     model = Property
-
-    # It assumes the template is in users/templates/users/home.html
-    template_name = 'home.html'
-
-    # in your HTML template (e.g., you'll loop through 'properties').
+    template_name = 'home.html' # Assuming your home.html is in users/templates/users/
     context_object_name = 'properties'
-    # Optional: Add pagination if you want to limit the number of properties per page
-    paginate_by = 8 # Display 8 properties per page, just like the UI image
+    paginate_by = 12 # Number of properties per page
 
     def get_queryset(self):
-        # By default, ListView retrieves all objects for the model.
-        # Here, we'll refine it to only show available properties, ordered by creation date.
-        queryset = super().get_queryset().filter(is_available=True, total_spots__gt=F('booked_spots')).order_by('-created_at')
+        """
+        Retrieves the queryset of properties, applying search and filter criteria.
+        """
+        # Start with all available properties, ordered by creation date (newest first)
+        queryset = Property.objects.filter(is_available=True).order_by('-created_at')
 
-        # You can add filtering based on URL parameters here if you add search/filter forms later
-        # Example for filtering by 'course' from URL:
-        # course_filter = self.request.GET.get('course')
-        # if course_filter:
-        #    queryset = queryset.filter(course__iexact=course_filter)
-        # 1. Price Sorting
-        price_sort = self.request.GET.get('price_sort') # e.g., ?price_sort=asc or ?price_sort=desc
-        if price_sort == 'asc':
-            queryset = queryset.order_by('rent')
-        elif price_sort == 'desc':
-            queryset = queryset.order_by('-rent')
-        else: # Default sorting if no price_sort is specified
-            queryset = queryset.order_by('-created_at')
+        # Apply search query filter
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query) | # Search in property title
+                Q(address__icontains=query) | # Search in property address
+                Q(university_nearby__icontains=query) | # Search in university nearby field
+                Q(description__icontains=query) # Search in description
+            ).distinct() # Use distinct to avoid duplicate results if a property matches multiple Q conditions
 
-        # 2. Room Count Filter
-        room_count = self.request.GET.get('room_count') # e.g., ?room_count=3
-        if room_count:
-            try:
-                num_rooms = int(room_count)
-                queryset = queryset.filter(number_of_rooms=num_rooms)
-            except ValueError:
-                pass # Ignore if room_count is not a valid integer
+        # Apply house type filter
+        house_type_filter = self.request.GET.get('house_type')
+        if house_type_filter and house_type_filter != '': # Check for empty string, not 'all'
+            queryset = queryset.filter(house_type=house_type_filter)
 
-        # 3. House Type Filter
-        house_type = self.request.GET.get('house_type') # e.g., ?house_type=condominium
-        if house_type:
-            # Case-insensitive filtering for house_type
-            queryset = queryset.filter(house_type__iexact=house_type)
+        # Apply gender preference filter (NEW)
+        gender_preference_filter = self.request.GET.get('gender_preference')
+        if gender_preference_filter and gender_preference_filter != '': # Check for empty string ('Any Gender')
+            # Assuming 'gender_preferred' is the field on your Property model
+            # You might need to adjust 'gender_preferred' to your actual field name
+            queryset = queryset.filter(gender_preferred=gender_preference_filter)
 
         return queryset
 
     def get_context_data(self, **kwargs):
+        """
+        Adds additional context variables to the template.
+        """
         context = super().get_context_data(**kwargs)
-        # Pass current filter parameters for active styling
-        context['current_price_sort'] = self.request.GET.get('price_sort', '')
-        context['current_room_count'] = self.request.GET.get('room_count', '')
-        context['current_house_type'] = self.request.GET.get('house_type', '')
-        context['current_min_rent'] = self.request.GET.get('min_rent', '')
-        context['current_max_rent'] = self.request.GET.get('max_rent', '')
+        
+        # Pass house type choices for filter dropdown
+        context['property_type_choices'] = Property.HOUSE_TYPE_CHOICES 
+        context['current_house_type'] = self.request.GET.get('house_type', '') # Keep selected filter active
 
-        # Pass property type choices for the dropdown in the filter modal
-        context['property_type_choices'] = Property.PROPERTY_TYPES
+        # Pass gender choices for filter dropdown (NEW)
+        context['property_gender_choices'] = Property.GENDER_PREFERENCE_CHOICES
+        context['current_gender_preference'] = self.request.GET.get('gender_preference', '') # Keep selected filter active
+
+        context['current_room_count'] = self.request.GET.get('room_count', '') # Keep room count if set
+        context['search_query'] = self.request.GET.get('q', '') # Keep search query in the input field
+        context['logo_text_color'] = '#7fc29b' # Example dynamic styling
+        context['header_button_color'] = '#e91e63' # Example dynamic styling
         return context
 
-        return queryset
 
+# --- PropertyDetailView ---
 class PropertyDetailView(DetailView):
+    """
+    A view to display the detailed information of a single property.
+    """
     model = Property
-    template_name = 'property_details.html' # New template for detail page
-    context_object_name = 'property' # Variable name in the template
-
-    def get_queryset(self):
-        # Prefetch related amenities and owner for efficiency
-        return super().get_queryset().select_related('owner').prefetch_related('amenities')
+    template_name = 'property_details.html'
+    context_object_name = 'property' # The variable name to use in the template
 
     def get_context_data(self, **kwargs):
+        """
+        Adds additional context variables to the template.
+        """
         context = super().get_context_data(**kwargs)
-        # You can add more context data here if needed for reviews, etc.
-        # For reviews, you'd typically have a separate Review model with ForeignKey to Property
-        # context['reviews'] = self.object.reviews.all() # Assuming 'reviews' related_name
+        context['logo_text_color'] = '#7fc29b'
+        context['header_button_color'] = '#e91e63'
         return context
 
-# --- Modified home_view ---
-#def home_view(request):
-    """
-    Renders the home page, which now directly displays property listings.
-    This effectively uses the PropertyListView's logic but renders the property_list.html template.
-    """
 
-#    view = PropertyListView()
-#    view.request = request # Pass the current request to the view
-#    queryset = view.get_queryset() # Get the filtered queryset
-
-    # Manually apply pagination if needed (ListView handles this automatically)
-    # For simplicity, if you want full pagination, it's often easier to just map the URL
-    # to PropertyListView.as_view() directly.
-    # However, if home.html is *exactly* property_list.html content, we can just pass the queryset.
-
- #   context = {
- #       'properties': queryset,
-        # If you need pagination controls on home.html, you'd need to manually
-        # create a Paginator object and pass 'page_obj' and 'is_paginated'.
-        # For a truly seamless home page as the main property list,
-        # using PropertyListView directly for the '/' path is usually better.
- #   }
- #   return render(request, 'home.html', context) # Renders the property_list template
-
-# --- NEW: Booking View ---
-@login_required # Ensures only logged-in users can access this page
+# --- book_property view (MODIFIED: Corrected logic for saving AdditionalOccupant) ---
+@login_required
 def book_property(request, pk):
-    property_obj = get_object_or_404(Property, pk=pk)
+    property_instance = get_object_or_404(Property, pk=pk)
+    max_tenants_value = int(getattr(property_instance, 'max_tenants', 1))
 
-    # Prevent booking if no spots are available
-    if property_obj.available_spots <= 0:
-        messages.error(request, f"Sorry, {property_obj.title} has no spots available for booking.")
-        return redirect('users:property_detail', pk=property_obj.pk)
+    if not request.user.is_authenticated or request.user.role != 'student':
+        messages.error(request, "Please log in as a student to book a property.")
+        return redirect('login:login')
 
     if request.method == 'POST':
-        form = BookingForm(request.POST, request=request, property_obj=property_obj)
-        if form.is_valid():
-            booking = form.save(commit=False) # Create booking object but don't save to DB yet
-            booking.property = property_obj
-            booking.tenant = request.user # Set the current logged-in user as the tenant
-            booking.status = 'pending' # Default status
-            booking.save()
+        # Always initialize forms and formsets with POST data on submission
+        form = BookingForm(request.POST)
+        occupant_formset = AdditionalOccupantFormSet(
+            request.POST,
+            prefix='occupants',
+            queryset=AdditionalOccupant.objects.none() # For new occupants
+        )
 
-            # The clean method on the model already checks available_spots before saving,
-            # but if we wanted to increment booked_spots immediately after save, it should be done here
-            # or by overriding the model's save method for 'confirmed' status.
-            # For 'pending' status, we often wait for admin approval to increment booked_spots.
-            # The model's save method has logic for 'confirmed' status to increment booked_spots.
+        # Default context for re-rendering with errors
+        context_for_errors = {
+            'property': property_instance,
+            'form': form,
+            'occupant_formset': occupant_formset,
+            'GENDER_CHOICES': CustomUser.GENDER_CHOICES,
+            'MAX_TENANTS_JS': max_tenants_value,
+        }
 
-            messages.success(request, f"Your booking for {property_obj.title} has been submitted successfully and is pending confirmation.")
-            return redirect('users:move_in_notice', booking_pk=booking.pk)
+        if form.is_valid() and occupant_formset.is_valid():
+            total_occupants_from_formset = 0
+            for form_in_set in occupant_formset:
+                if form_in_set.cleaned_data and not form_in_set.cleaned_data.get('DELETE'):
+                    total_occupants_from_formset += 1
+
+            total_occupants = 1 + total_occupants_from_formset # Primary booker + valid additional occupants
+
+            if total_occupants > max_tenants_value:
+                form.add_error(None, f"This property can accommodate a maximum of {max_tenants_value} tenant(s). You have {total_occupants} total occupants in your booking.")
+                # Return render with the already populated forms/formset
+                return render(request, 'booking_form.html', context_for_errors)
+            else:
+                booking = form.save(commit=False)
+                booking.property = property_instance
+                booking.tenant = request.user
+                booking.number_of_occupants = total_occupants
+                booking.save()
+
+                for form_in_set in occupant_formset:
+                    if form_in_set.cleaned_data and not form_in_set.cleaned_data.get('DELETE'):
+                        occupant_instance = form_in_set.save(commit=False)
+                        occupant_instance.booking = booking
+                        occupant_instance.save()
+
+                property_instance.is_available = False
+                property_instance.save()
+                messages.success(request, 'Your booking has been successfully submitted and the property is now marked as unavailable!') 
+                return redirect('users:move_in_notice', booking_pk=booking.pk)
         else:
-            messages.error(request, "Please correct the errors in the form.")
-    else:
-        # For GET request, instantiate an empty form, pre-filling user data
-        form = BookingForm(request=request, property_obj=property_obj)
+            # If main form or formset is not valid, print errors for debugging and re-render
+            print("Form is NOT valid. Errors:")
+            print("Main Form Errors:", form.errors)
+            if form.non_field_errors:
+                print("Main Form Non-Field Errors:", form.non_field_errors)
+            
+            print("\nOccupant Formset is NOT valid. Errors:")
+            print("Formset Non-Form Errors:", occupant_formset.non_form_errors())
+            for i, form_in_set in enumerate(occupant_formset):
+                if form_in_set.errors:
+                    print(f"Form {i} Errors:", form_in_set.errors)
+            
+            # Return render with the already populated forms/formset
+            return render(request, 'booking_form.html', context_for_errors)
+
+    else: # GET request (initial page load)
+        form = BookingForm(initial={
+            'full_name_on_form': request.user.full_name,
+            'gender_on_form': request.user.gender,
+            'email_on_form': request.user.email,
+        })
+        occupant_formset = AdditionalOccupantFormSet(
+            prefix='occupants',
+            queryset=AdditionalOccupant.objects.none()
+        )
 
     context = {
+        'property': property_instance,
         'form': form,
-        'property': property_obj,
-        'logo_text_color': '#7fc29b', # Example color from style.css for dynamic styling
-        'header_button_color': '#e91e63', # Example color
+        'occupant_formset': occupant_formset,
+        'GENDER_CHOICES': CustomUser.GENDER_CHOICES,
+        'MAX_TENANTS_JS': max_tenants_value,
     }
     return render(request, 'booking_form.html', context)
 
-# ... (login_view, logout_view, register_user_view - keep as is, these are in login/views.py) ...
 
-# --- NEW: Move-in Notice View ---
+# --- move_in_notice view (MODIFIED: Displays additional occupant details) ---
 @login_required
 def move_in_notice(request, booking_pk):
-    # Get the specific booking object
-    booking = get_object_or_404(Booking, pk=booking_pk, tenant=request.user)
+    booking = get_object_or_404(Booking, pk=booking_pk)
+    if request.user != booking.tenant and not request.user.is_superuser:
+        messages.error(request, "Access Denied. You are not authorized to view this notice.")
+        return redirect('users:home')
 
-    # You can pass additional context here if needed
+    # Fetch additional occupants related to this booking
+    additional_occupants = booking.additional_occupants.all() # Using the related_name defined in models.py
+
     context = {
         'booking': booking,
-        'property': booking.property, # Access the related property
+        'property': booking.property,
+        'additional_occupants': additional_occupants, # Pass additional occupants to the template
         'logo_text_color': '#7fc29b',
         'header_button_color': '#e91e63',
-        # You might want to pass a generic "contact owner" URL or logic later
     }
     return render(request, 'move_in_notice.html', context)
 
-# --- MODIFIED: chat_view ---
+
+# --- chat_view view ---
 @login_required
 def chat_view(request, property_pk, other_user_pk):
+    """
+    Handles the display and sending of chat messages between a tenant and a owner for a specific property.
+    Ensures that only authorized users (owner-tenant pairs for a property, or superusers) can access the chat.
+    """
     property_obj = get_object_or_404(Property, pk=property_pk)
     target_user = get_object_or_404(CustomUser, pk=other_user_pk)
 
-    # Security check: Ensure the current user is either the property owner OR the person chatting with the owner
     is_authorized = False
-
-    # Scenario 1: Landlord (logged-in user) is chatting with a tenant/student
-    if request.user == property_obj.owner and (target_user.role == 'student' or target_user.role == 'tenant'):
+    # Scenario 1: owner (logged-in user) is chatting with a student (target user)
+    if request.user == property_obj.owner and (target_user.role == 'student'):
         is_authorized = True
-    # Scenario 2: Tenant/Student (logged-in user) is chatting with the landlord (property owner)
-    elif (request.user.role == 'student' or request.user.role == 'tenant') and target_user == property_obj.owner:
+    # Scenario 2: Student (logged-in user) is chatting with the owner (property owner)
+    elif (request.user.role == 'student') and target_user == property_obj.owner:
         is_authorized = True
-    # Scenario 3: Admin access (optional)
-    elif request.user.is_superuser: # Admins can view any chat
+    # Scenario 3: Superuser can access any chat
+    elif request.user.is_superuser:
         is_authorized = True
 
     if not is_authorized:
         messages.error(request, "You are not authorized to view this chat.")
-        return redirect('users:home')
+        return redirect('users:home') # Redirect to a safe page if not authorized
 
-    # Determine if the currently logged-in user IS the owner of this property
+    # Determine if the current user is the owner of the property (for UI purposes)
     is_current_user_owner = (request.user == property_obj.owner)
 
-    # Filter messages relevant to this conversation (between current user and owner, about this property)
+    # Retrieve chat messages between the two users for this specific property
     chat_messages = ChatMessage.objects.filter(
         Q(sender=request.user, receiver=target_user, property=property_obj) |
         Q(sender=target_user, receiver=request.user, property=property_obj)
-    ).order_by('timestamp')
+    ).order_by('timestamp') # Order messages by timestamp
 
-    # Handle sending new messages
-     # Handle sending new messages
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
             message_content = form.cleaned_data['message']
-            # Determine receiver based on who the 'other_user' is
-            # If current user is owner, send to target_user (tenant/student)
-            # If current user is tenant/student, send to property owner
+            # Determine the actual receiver based on who the current user is
             actual_receiver = target_user if request.user == property_obj.owner else property_obj.owner
 
             ChatMessage.objects.create(
                 sender=request.user,
-                receiver=actual_receiver, # The calculated receiver
+                receiver=actual_receiver,
                 property=property_obj,
                 message=message_content
             )
+            # Add a success message (optional, but good for user feedback)
             messages.success(request, "Message sent!")
-            # Redirect back to the same chat view to prevent form resubmission
+            # Redirect back to the same chat page to prevent form resubmission
             return redirect('users:chat_with_user', property_pk=property_pk, other_user_pk=other_user_pk)
         else:
+            # If form is not valid, add an error message
             messages.error(request, "Please correct the message error.")
-    else:
+    else: # GET request: Initialize an empty message form
         form = MessageForm()
 
     context = {
         'property': property_obj,
-        'target_user': target_user, # Pass the 'other' person in chat for displaying their name
+        'target_user': target_user,
         'chat_messages': chat_messages,
         'form': form,
         'logo_text_color': '#7fc29b',
@@ -239,50 +279,53 @@ def chat_view(request, property_pk, other_user_pk):
     }
     return render(request, 'chat_page.html', context)
 
-# --- NEW: API Endpoint for Recent Chats ---
+
+# --- recent_chats_api_view ---
 @login_required
 def recent_chats_api_view(request):
-    user = request.user
-
-    # Get recent chat messages where the current user is either sender or receiver
-    # This is a bit complex: we want the *last* message for each unique conversation.
-    # A conversation is defined by (property, other_participant).
-
-    # First, get all messages involving the current user, ordered by timestamp desc
-    all_user_messages = ChatMessage.objects.filter(
-        Q(sender=user) | Q(receiver=user)
+    """
+    API endpoint to fetch recent chat conversations for the logged-in user.
+    Returns a JSON response with chat details.
+    """
+    user_id = request.user.id
+    # Fetch all messages involving the user, ordered by most recent first
+    all_messages = ChatMessage.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
     ).order_by('-timestamp')
 
-    conversations = {} # Key: (property_id, other_user_id) -> LastMessage
+    chats_data = []
+    processed_conversations = set()
 
-    for msg in all_user_messages:
-        # Determine the other participant in this specific message context
-        other_participant = msg.sender if msg.receiver == user else msg.receiver
+    for msg in all_messages:
+        # Determine the 'other' participant in the conversation
+        other_user = msg.sender if msg.receiver == request.user else msg.receiver
 
-        # Skip if the other_participant is the current user themselves (self-chat)
-        if other_participant == user:
+        # Skip if the 'other user' is the current user themselves (self-chat case)
+        if other_user == request.user:
             continue
 
-        # Create a unique key for this conversation
-        # Ensures that a chat about Property A with User X is distinct from Property B with User X
-        conversation_key = (msg.property.pk, other_participant.pk)
+        # Create a canonical key for the conversation (property_id, min_user_id, max_user_id)
+        user_ids = sorted([request.user.id, other_user.id])
+        conversation_key = (msg.property.id if msg.property else None, user_ids[0], user_ids[1])
 
-        # If this conversation key hasn't been seen yet, or if this message is newer, store it
-        if conversation_key not in conversations:
-            conversations[conversation_key] = {
-                'property_id': msg.property.pk,
-                'property_title': msg.property.title,
-                'property_main_image': msg.property.main_image.url if msg.property.main_image else None,
-                'other_user_id': other_participant.pk,
-                'other_user_username': other_participant.username,
-                'other_user_full_name': other_participant.full_name or other_participant.username,
-                'last_message': msg.message,
-                'last_message_timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-                'last_message_is_read': msg.is_read,
-                'last_message_sender_is_me': (msg.sender == user),
-            }
+        if conversation_key in processed_conversations:
+            continue  # Already processed this conversation
 
-    # Convert the dictionary values to a list for JSON response
-    recent_chats_list = list(conversations.values())
+        processed_conversations.add(conversation_key)
 
-    return JsonResponse({'chats': recent_chats_list})
+        chats_data.append({
+            'property_id': msg.property.pk if msg.property else None,
+            'property_title': msg.property.title if msg.property else 'General Chat',
+            'property_main_image': msg.property.main_image.url if msg.property and msg.property.main_image else None,
+            'other_user_id': other_user.pk,
+            'other_user_username': other_user.username,
+            'other_user_full_name': other_user.full_name or other_user.username,
+            'last_message': msg.message,
+            'last_message_timestamp': msg.timestamp.isoformat(),
+            'last_message_sender_is_me': msg.sender == request.user,
+        })
+
+    # Sort the final list by the timestamp of the last message in descending order (most recent first)
+    chats_data.sort(key=lambda x: x['last_message_timestamp'], reverse=True)
+
+    return JsonResponse({'chats': chats_data})

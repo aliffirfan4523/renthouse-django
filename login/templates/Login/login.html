@@ -69,12 +69,12 @@
             // Function to update UI based on role
             function updateUIForRole(role) {
                 if (role === 'owner') {
-                    welcomeMessage.textContent = 'Welcome back, Landlord!';
+                    welcomeMessage.textContent = 'Welcome back, Owner!';
                     toggleRoleBtn.textContent = 'Login as Student';
                     roleTypeInput.value = 'owner';
                 } else { // role === 'student'
                     welcomeMessage.textContent = 'Welcome back, Student!';
-                    toggleRoleBtn.textContent = 'Login as Landlord';
+                    toggleRoleBtn.textContent = 'Login as Owner';
                     roleTypeInput.value = 'student';
                 }
                 currentRole = role;

@@ -1,29 +1,457 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RentUrHouse - Property Listings</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="../static/css/style.css" />
-    <script src="{% static 'script/main.js' %}"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentUrHouse - Your Home, Your Choice</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main_app.css' %}">
+
+    <style>
+        /* General Body and Container */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f0f2f5; /* Light gray background */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            position: sticky; top: 0; left: 0; right: 0; z-index: 1000;
+            background-color: white; padding: 15px 20px; border-bottom: 1px solid #e0e0e0;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); border-radius: 0 0 10px 10px;
+        }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { font-size: 24px; color: #4a5568; }
+        .logo-text { font-size: 20px; font-weight: 600; color: #2d3748; }
+        .header-right { display: flex; align-items: center; gap: 15px; position: relative; }
+        .profile-menu { position: relative; display: inline-block; }
+        .profile-dropdown { display: none; position: absolute; right: 0; top: 100%; background-color: white; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); border-radius: 8px; min-width: 150px; z-index: 100; }
+        .profile-dropdown a { color: #333; padding: 12px 16px; text-decoration: none; display: block; }
+        .profile-dropdown a:hover { background-color: #f5f5f5; }
+        .profile-dropdown.show { display: block; }
+        .header-button { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0 5px; color: #4a5568; }
+        .header-button.profile { background-color: #fce4ec; color: #7fc29b; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .filter-button {
+            background-color: #6366f1; /* Tailwind indigo-500 */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .filter-button:hover { background-color: #4f46e5; }
+
+        /* Search Bar */
+        .search-bar-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            position: relative;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            border: 1px solid #cbd5e0;
+            border-radius: 10px;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+        }
+        .search-bar:focus {
+            border-color: #7fc29b;
+            box-shadow: 0 0 0 3px rgba(127, 194, 155, 0.2);
+            outline: none;
+        }
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+            font-size: 20px;
+        }
+
+        /* Filters Section */
+        .filters-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap; /* Allow filters to wrap */
+        }
+        .filter-dropdown {
+            position: relative;
+        }
+        .filter-select {
+            padding: 8px 15px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 15px;
+            background-color: white;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234a5568%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-6.5H18.6c-5.4%200-10.3%202.2-13.2%206.5-2.9%204.3-2.9%209.6%200%2013.9l127.4%20127.4c2.9%204.3%207.8%206.5%2013.2%206.5s10.3-2.2%2013.2-6.5L287%2083.3c2.9-4.3%202.9-9.6%200-13.9z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 0.7em top 50%;
+            background-size: 0.65em auto;
+            padding-right: 25px;
+        }
+        .filter-select:focus {
+            border-color: #7fc29b;
+            box-shadow: 0 0 0 3px rgba(127, 194, 155, 0.2);
+            outline: none;
+        }
+
+        /* Property Grid */
+        .property-grid-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+        }
+
+        /* Property Card */
+        .property-card {
+            background-color: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+        }
+        .property-image-container {
+            width: 100%;
+            padding-bottom: 60%; /* Aspect ratio 5:3 */
+            position: relative;
+            background-color: #e2e8f0; /* Placeholder background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #718096;
+            font-size: 14px;
+        }
+        .property-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .property-info {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .property-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        .property-address {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .property-type-rooms {
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        .property-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-top: auto; /* Pushes price to the bottom */
+        }
+        .spot-left {
+            font-size: 14px;
+            font-weight: 600;
+            color: #7fc29b; /* Accent color */
+            margin-top: 5px;
+        }
+
+        /* Pagination */
+        .pagination {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            gap: 0;
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            z-index: 1002;
+            padding: 10px 0;
+        }
+        .pagination a, .pagination span {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .pagination a:hover {
+            background-color: #e2e8f0;
+            border-color: #a0aec0;
+        }
+        .pagination .current-page {
+            background-color: #7fc29b;
+            color: white;
+            border-color: #7fc29b;
+            font-weight: 600;
+        }
+        .pagination .disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Filter Modal */
+        .filter-modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1001; /* Sit on top of other content */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+        }
+        .filter-modal.show {
+            display: flex; /* Show when 'show' class is added */
+        }
+        .filter-form-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px; /* Max width for modal */
+            animation: slideInFromTop 0.4s ease-out;
+        }
+        .filter-form-content h2 {
+            text-align: center;
+            color: #2d3748;
+            font-size: 24px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #7fc29b;
+            padding-bottom: 10px;
+        }
+        .filter-form-content .form-group {
+            margin-bottom: 20px;
+        }
+        .filter-form-content label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 15px;
+        }
+        .filter-form-content input[type="number"],
+        .filter-form-content select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: #fff;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234a5568%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-6.5H18.6c-5.4%200-10.3%202.2-13.2%206.5-2.9%204.3-2.9%209.6%200%2013.9l127.4%20127.4c2.9%204.3%207.8%206.5%2013.2%206.5s10.3-2.2%2013.2-6.5L287%2083.3c2.9-4.3%202.9-9.6%200-13.9z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 0.7em top 50%;
+            background-size: 0.65em auto;
+        }
+        .filter-form-content input:focus,
+        .filter-form-content select:focus {
+            border-color: #7fc29b;
+            box-shadow: 0 0 0 3px rgba(127, 194, 155, 0.2);
+            outline: none;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+        .form-actions button {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .form-actions .clear-filters {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+        }
+        .form-actions .clear-filters:hover {
+            background-color: #cbd5e0;
+        }
+        .form-actions .apply-filters {
+            background-color: #7fc29b;
+            color: white;
+            border: none;
+        }
+        .form-actions .apply-filters:hover {
+            background-color: #63a780;
+        }
+
+        /* Animations */
+        @keyframes slideInFromTop {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .property-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+            }
+            .header-left .logo-text {
+                display: none; /* Hide text logo on smaller screens */
+            }
+            .search-bar-container {
+                margin: 15px auto;
+            }
+            .filters-container {
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            .filter-button, .filter-select {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+            .property-grid-container {
+                padding: 15px;
+            }
+            .property-grid {
+                grid-template-columns: 1fr; /* Single column on small screens */
+                gap: 15px;
+            }
+            .property-info {
+                padding: 12px;
+            }
+            .property-title {
+                font-size: 16px;
+            }
+            .property-address, .property-type-rooms, .spot-left {
+                font-size: 13px;
+            }
+            .property-price {
+                font-size: 16px;
+            }
+            .pagination {
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+            .pagination a, .pagination span {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+            .filter-form-content {
+                padding: 20px;
+            }
+            .filter-form-content h2 {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+            .filter-form-content input, .filter-form-content select {
+                padding: 10px 12px;
+                font-size: 15px;
+            }
+            .form-actions button {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-right {
+                gap: 10px;
+            }
+            .header-button.profile {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+            .filter-button {
+                padding: 5px 10px;
+            }
+            .property-grid-container {
+                padding: 10px;
+            }
+            .property-card {
+                border-radius: 10px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-
     <!-- Header Section -->
     <header class="header">
         <div class="header-left" onclick="window.location.href='{% url 'users:home' %}'" style="cursor: pointer;">
-            <img class="logo-icon" src="../static/img/Logo.svg" alt="Logo" width="40" height="40">
-            <span class="logo-text">RentUrHouse</span>
+            <span class="logo-icon"><img class="logo-icon" src="{% static 'img/Logo.svg' %}" alt="Chat" width="40" height="40"></span>
+            <span class="logo-text" style="color: {{ logo_text_color }};">RentUrHouse</span>
         </div>
         <div class="header-middle">
+            <a class="logo-text" style="color: {{ logo_text_color }};" href="{% url 'users:home' %}">Homepage</a> | 
+            <a class="logo-text" style="color: {{ logo_text_color }};" href="{% url 'tenant:tenant_home' %}">My House</a>
         </div>
         <div class="header-right">
-            <button id="openChatPopupBtn" class="header-button profile">
-                <img class="logo-icon" src="{% static 'img/Chat Button.svg' %}" alt="Chat" width="40" height="40"> {# Adjusted width/height for header button size #}
+            <button id="openChatPopupBtn" class="header-button profile" style="background-color: #f1e4fc; color: #9c27b0;">
+                <img class="logo-icon" src="{% static 'img/Chat Button.svg' %}" alt="Chat" width="40" height="40">
             </button>
             <div class="profile-menu">
                 <a href="#" id="menu-button">
@@ -32,7 +460,6 @@
                 <div class="profile-dropdown" id="menu-dropdown">
                     {% if user.is_authenticated %}
                     <a href="#">My Profile</a>
-                    <a href="{% url 'tenant:tenant_home' %}">My Home</a>
                     <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
 
                 </div>
@@ -40,104 +467,136 @@
         </div>
     </header>
 
-    {% block content %} {# Page specific content will go here #} {% endblock %} {% if user.is_authenticated %} {# NEW: Include the chat popup partial ONLY if user is authenticated #} {% include 'components/chat_popup.html' %} {% endif %}
-
-    <!-- Filter Bar Section -->
-    <section class="filter-bar">
-        <!-- Price Filter -->
-        <a href="{% url 'users:home' %}?price_sort={% if current_price_sort == 'desc' %}asc{% else %}desc{% endif %}{% for key, value in request.GET.items %}{% if key != 'page' and key != 'price_sort' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="filter-button {% if current_price_sort %}active{% endif %}">
-            <span class="filter-icon">{% if current_price_sort == 'desc' %}⬇️{% elif current_price_sort == 'asc' %}⬆️{% else %}⇅{% endif %}</span> Price
-        </a>
-
-        <!-- Room Filter (Example for 3 rooms, you'd expand this with more options or a dropdown) -->
-        <a href="{% url 'users:home' %}?room_count=3{% for key, value in request.GET.items %}{% if key != 'page' and key != 'room_count' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="filter-button {% if current_room_count == '3' %}active{% endif %}">
-            <span class="filter-icon">🛏️</span> 3 Rooms
-        </a>
-
-        <!-- House Type Filter (Example for Condominium) -->
-        <a href="{% url 'users:home' %}?house_type=condominium{% for key, value in request.GET.items %}{% if key != 'page' and key != 'house_type' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="filter-button {% if current_house_type == 'condominium' %}active{% endif %}">
-            <span class="filter-icon">🏠</span> Condominium
-        </a>
-
-        <!-- Filters Button (Opens a modal form) -->
-        <button class="filter-button" onclick="document.getElementById('filterModal').classList.add('show');">
-            <span class="filter-icon">⚙️</span> Filters
+    <!-- Search Bar -->
+    <form method="GET" action="{% url 'users:home' %}" class="search-bar-container">
+        <input type="text" name="q" placeholder="Search by title, address, or university..." class="search-bar" value="{{ search_query }}">
+        <button type="submit" class="search-icon" style="background: none; border: none; cursor: pointer;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </button>
-    </section>
+    </form>
 
-    <!-- Property Grid Section -->
-    <main class="property-grid">
-        {% if properties %} {% for property in properties %}
-        <a href="{% url 'users:property_detail' pk=property.id %}" class="property-card">
-            <div class="property-image-container">
-                {% if property.main_image %}
-                <img src="{{ property.main_image }}" alt="{{ property.house_type }} at {{ property.address }}" class="property-image"> {% else %}
-                <img src="https://placehold.co/600x360/A0A0A0/FFFFFF?text=No+Image" alt="No image available" class="property-image"> {% endif %}
+    <!-- Filters -->
+    <div class="filters-container">
+        <form method="GET" action="{% url 'users:home' %}" id="filter-form">
+            <input type="hidden" name="q" value="{{ search_query }}"> {# Keep search query on filter submission #}
+            <div class="filter-dropdown">
+                <label for="house_type" class="sr-only">Property Type</label>
+                <select name="house_type" id="house_type" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Any Type</option>
+                    {% for type_choice in property_type_choices %}
+                        <option value="{{ type_choice.0 }}" {% if current_house_type == type_choice.0 %}selected{% endif %}>{{ type_choice.1 }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="property-info">
-                <div class="property-title">{{ property.title }}</div>
-                <div class="property-location">{{ property.address|truncatechars:30 }}</div>
-                <div class="property-details">{{ property.house_type|capfirst }}{% if property.number_of_rooms %}, {{ property.number_of_rooms }} Room{% if property.number_of_rooms != 1 %}s{% endif %}{% endif %}{% if property.course %}, {{ property.course }}{% endif %}</div>
-                <!-- Added title -->
-                <div class="property-spot">Spot Left: {{ property.available_spots }}</div>
-                <!-- Added spot left -->
-                <div class="property-price">RM {{ property.rent }} per Month</div>
+            <div class="filter-dropdown">
+                <label for="gender_preference" class="sr-only">Gender Preference</label>
+                <select name="gender_preference" id="gender_preference" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Any Gender</option>
+                    {% for gender_choice in property_gender_choices %}
+                        <option value="{{ gender_choice.0 }}" {% if current_gender_preference == gender_choice.0 %}selected{% endif %}>{{ gender_choice.1 }}</option>
+                    {% endfor %}
+                </select>
             </div>
-        </a>
-        {% endfor %} {% else %}
-        <p style="text-align: center; width: 100%; padding: 50px;">No available properties found matching your criteria.</p>
-        {% endif %}
+            {# Open the advanced filter modal #}
+            <button type="button" class="filter-button" id="openFilterModalBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sliders"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                More Filters
+            </button>
+        </form>
+    </div>
 
+    <!-- Property Grid Container -->
+    <div class="property-grid-container">
+        <div class="property-grid">
+            {% for property in properties %}
+                <a href="{% url 'users:property_detail' pk=property.pk %}" class="property-card">
+                    <div class="property-image-container">
+                        {% if property.main_image %}
+                            {% if property.main_image.url|slice:"7:12" == "https" %}
+                                <img src="{{ property.main_image }}" alt="{{ property.title }}" class="property-image" onerror="this.onerror=null;this.src='https://placehold.co/400x240/e2e8f0/718096?text=Image+Error'; console.error('Failed to load external image (likely CORS or invalid URL): {{ property.main_image.url }}');">
+                            {% else %}
+                                <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="property-image" onerror="this.onerror=null;this.src='https://placehold.co/400x240/e2e8f0/718096?text=Image+Error'; console.error('Failed to load local image (check MEDIA_ROOT/MEDIA_URL settings or file existence): {{ property.main_image.url }}');">
+                            {% endif %}
+                        {% else %}
+                            <img src="https://placehold.co/400x240/e2e8f0/718096?text=No+Image" alt="No Image Available" class="property-image">
+                        {% endif %}
+                    </div>
+                    <div class="property-info">
+                        <h3 class="property-title">{{ property.title }}</h3>
+                        <p class="property-address">{{ property.address|truncatechars:50 }}</p>
+                        <p class="property-type-rooms">
+                            {{ property.house_type }}{% if property.bedrooms %}, {{ property.bedrooms }} Bedroom{% if property.bedrooms != 1 %}s{% endif %}{% endif %}
+                        </p>
+                        <p class="property-price">RM {{ property.rent }} / Month</p>
+                        <p class="spot-left">
+                            {% if property.is_available %}Available{% else %}<span style="color: red;">Not Available</span>{% endif %}
+                        </p>
+                    </div>
+                </a>
+            {% empty %}
+                <p style="grid-column: 1 / -1; text-align: center; color: #4a5568;">No properties match your criteria.</p>
+            {% endfor %}
+        </div>
 
-        <!-- Pagination Section -->
-        {% if is_paginated %}
+        <!-- Pagination -->
         <div class="pagination">
             {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a> {% endif %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_house_type %}&house_type={{ current_house_type }}{% endif %}{% if current_gender_preference %}&gender_preference={{ current_gender_preference }}{% endif %}">Previous</a>
+            {% else %}
+                <span class="disabled">Previous</span>
+            {% endif %}
+
             <span class="current-page">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-        </span> {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a> {% endif %}
-        </div>
-    </main>
-    {% endif %}
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
 
-    <!-- Filter Modal (Hidden by default) -->
-    <div id="filterModal" class="filter-modal" onclick="if (event.target === this) this.classList.remove('show');">
-        <div class="filter-form-content">
-            <h2>Advanced Filters</h2>
-            <form action="{% url 'users:home' %}" method="get">
-                <div class="form-group">
-                    <label for="id_room_count">Number of Rooms:</label>
-                    <input type="number" id="id_room_count" name="room_count" min="1" value="{{ current_room_count }}">
-                </div>
-                <div class="form-group">
-                    <label for="id_house_type">Property Type:</label>
-                    <select id="id_house_type" name="house_type">
-                        <option value="">Any Type</option>
-                        {% for type_choice in property_type_choices %}
-                            <option value="{{ type_choice.0 }}" {% if current_house_type == type_choice.0 %}selected{% endif %}>{{ type_choice.1 }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="id_min_rent">Minimum Rent:</label>
-                    <input type="number" id="id_min_rent" name="min_rent" min="0" value="{{ request.GET.min_rent }}">
-                </div>
-                <div class="form-group">
-                    <label for="id_max_rent">Maximum Rent:</label>
-                    <input type="number" id="id_max_rent" name="max_rent" min="0" value="{{ request.GET.max_rent }}">
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="clear-filters" onclick="window.location.href='{% url 'users:home' %}';">Clear Filters</button>
-                    <button type="submit" class="apply-filters">Apply Filters</button>
-                </div>
-            </form>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_house_type %}&house_type={{ current_house_type }}{% endif %}{% if current_gender_preference %}&gender_preference={{ current_gender_preference }}{% endif %}">Next</a>
+            {% else %}
+                <span class="disabled">Next</span>
+            {% endif %}
         </div>
     </div>
-    {# Include the chat popup partial (if you added it globally) #} {% if user.is_authenticated %} {% include 'components/chat_popup.html' %} {% endif %}
-    <!-- JavaScript for dropdown -->
-</body>
 
+    <!-- Filter Modal Partial -->
+    {% include 'partials/filter_modal.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Filter Modal Logic
+            const filterModal = document.getElementById('filterModal');
+            const openFilterModalBtn = document.getElementById('openFilterModalBtn');
+
+            if (openFilterModalBtn && filterModal) {
+                openFilterModalBtn.addEventListener('click', function() {
+                    filterModal.classList.add('show');
+                });
+
+                filterModal.addEventListener('click', function(event) {
+                    if (event.target === filterModal) { // Close when clicking outside the modal content
+                        filterModal.classList.remove('show');
+                    }
+                });
+            }
+
+            // --- Image Debugging for each property ---
+            const propertyImages = document.querySelectorAll('.property-image');
+            propertyImages.forEach(img => {
+                // Log the src of each image on page load
+                console.log("Attempting to load image:", img.src);
+
+                // Add an event listener to catch images that fail to load
+                img.addEventListener('error', function() {
+                    console.error("Image failed to load:", this.src);
+                    // The onerror is already set in the HTML for a fallback placeholder
+                });
+            });
+            // --- End Image Debugging ---
+
+        });
+    </script>
+    <script src="{% static 'js/main.js' %}"></script>
+        {% if user.is_authenticated %} {% include 'partials/chat_popup.html' %} {% endif %}
+</body>
 </html>

@@ -169,4 +169,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         // If shouldGoBackInHistory is false, the default 'href' to property_detail remains active.
     }
+
+    setTimeout(() => {
+    const msgs = document.querySelector('.messages');
+    if (msgs) msgs.style.display = 'none';
+  }, 4000);  // Hide after 4 seconds
 });

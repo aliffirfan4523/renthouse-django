@@ -1,6 +1,6 @@
 
 from django.urls import path
-from .views import HomePropertyListView, PropertyDetailView, book_property, move_in_notice, chat_view, recent_chats_api_view 
+from .views import HomePropertyListView, HomePropertyListView, PropertyDetailView, book_property, move_in_notice, chat_view, recent_chats_api_view 
 
 app_name = 'users'
 

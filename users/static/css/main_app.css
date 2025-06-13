@@ -937,3 +937,19 @@ body {
         /* Make buttons full width */
     }
 }
+
+.messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #f0fdf4;
+    border: 1px solid #38a169;
+    padding: 10px 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+  .messages .error {
+    background: #fed7d7;
+    border-color: #e53e3e;
+  }

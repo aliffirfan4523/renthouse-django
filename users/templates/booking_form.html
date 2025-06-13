@@ -5,20 +5,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book {{ property.title }} | RentUrHouse</title>
+    <title>Booking Form | RentUrHouse</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Assuming your combined CSS is here #}
+    <link rel="stylesheet" href="{% static 'css/main_app.css' %}">
     <style>
-        /* Specific styles for the booking form */
+        /* Base styles from previous version, kept for continuity */
         
-        .booking-container {
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background-color: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-radius: 0 0 10px 10px;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            font-size: 24px;
+            color: #4a5568;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+        
+        .profile-menu {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            min-width: 150px;
+            z-index: 100;
+        }
+        
+        .profile-dropdown a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .profile-dropdown a:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .profile-dropdown.show {
+            display: block;
+        }
+        
+        .header-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+            color: #4a5568;
+        }
+        
+        .header-button.profile {
+            background-color: #fce4ec;
+            color: #7fc29b;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: calc(100vh - 100px);
-            /* Adjust based on header/footer height */
-            padding: 20px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+            margin-left: 20px;
+        }
+        
+        .back-link svg {
+            margin-right: 5px;
+            font-size: 20px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            flex-grow: 1;
+            text-align: center;
+            margin-right: 80px;
+        }
+        
+        .booking-form-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px 20px;
             box-sizing: border-box;
+            background-color: #f0f2f5;
         }
         
         .booking-card {
@@ -26,94 +155,148 @@
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             display: flex;
-            flex-wrap: wrap;
-            /* Allow columns to wrap on smaller screens */
             width: 100%;
-            max-width: 900px;
-            /* Max width of the booking card */
+            max-width: 1000px;
             overflow: hidden;
-            /* Ensure rounded corners */
-            border: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+            height: 80vh;
+            /* Adjust as needed */
+            max-height: 800px;
+            /* Max height to prevent it from getting too tall */
         }
         
-        .booking-left,
-        .booking-right {
-            padding: 30px;
+        .booking-left-panel {
+            flex: 1;
+            min-height: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .booking-left-panel h2 {
+            font-size: 28px;
+            color: #2d3748;
+            margin-top: 0;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 2px solid #7fc29b;
+            padding-bottom: 15px;
+            flex-shrink: 0;
+        }
+        
+        .booking-form {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 15px;
             box-sizing: border-box;
         }
         
-        .booking-left {
-            flex: 2;
-            /* Form column */
-            min-width: 300px;
-            /* Minimum width for form */
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .booking-right {
-            flex: 1;
-            /* Property details column */
-            min-width: 250px;
-            /* Minimum width for details */
-            background-color: #f7fafc;
-            border-left: 1px solid #eef2f6;
-            /* Separator line */
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
         .booking-form .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .booking-form label {
             display: block;
-            font-weight: 500;
+            font-weight: 600;
             color: #4a5568;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-size: 15px;
         }
         
         .booking-form input[type="text"],
         .booking-form input[type="email"],
         .booking-form input[type="number"],
         .booking-form input[type="date"],
-        .booking-form textarea {
+        .booking-form textarea,
+        .booking-form select {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 15px;
             border: 1px solid #cbd5e0;
             border-radius: 8px;
             font-size: 16px;
-            box-sizing: border-box;
             color: #2d3748;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: #fff;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234a5568%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-6.5H18.6c-5.4%200-10.3%202.2-13.2%206.5-2.9%204.3-2.9%209.6%200%2013.9l127.4%20127.4c2.9%204.3%207.8%206.5%2013.2%206.5s10.3-2.2%2013.2-6.5L287%2083.3c2.9-4.3%202.9-9.6%200-13.9z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 0.7em top 50%;
+            background-size: 0.65em auto;
         }
         
-        .booking-form input::placeholder,
-        .booking-form textarea::placeholder {
-            color: #a0aec0;
+        .booking-form input:focus,
+        .booking-form textarea:focus,
+        .booking-form select:focus {
+            border-color: #7fc29b;
+            box-shadow: 0 0 0 3px rgba(127, 194, 155, 0.2);
+            outline: none;
         }
         
-        .booking-form textarea {
-            resize: vertical;
+        .booking-form .errorlist {
+            color: #e53e3e;
+            font-size: 13px;
+            margin-top: 5px;
+            list-style: none;
+            padding: 0;
         }
-        /* Property Details Card in Right Column */
+        /* Style for dynamic occupant sections */
+        
+        .occupant-form-card {
+            /* Changed from .occupant-section */
+            border: 1px dashed #cbd5e0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            background-color: #f7fafc;
+        }
+        
+        .occupant-form-card h4 {
+            /* Changed from .occupant-section h3 */
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #2d3748;
+            font-size: 20px;
+            text-align: center;
+        }
+        
+        .occupant-form-card .delete-checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .booking-right-panel {
+            flex: 1;
+            background-color: #f7fafc;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-left: 1px solid #e0e0e0;
+            height: 100%;
+            overflow-y: auto;
+        }
         
         .property-summary-card {
             background-color: white;
-            /* Inner white card */
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             overflow: hidden;
-            flex-grow: 1;
-            /* Allow it to fill space */
+            width: 100%;
+            max-width: 350px;
+            margin: auto;
         }
         
         .property-summary-card .image-container {
             width: 100%;
             padding-bottom: 60%;
-            /* Aspect ratio for image */
             position: relative;
             background-color: #e2e8f0;
         }
@@ -128,187 +311,306 @@
         }
         
         .property-summary-info {
-            padding: 15px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
         
         .property-summary-info h4 {
             margin: 0;
-            font-size: 18px;
+            font-size: 20px;
             color: #2d3748;
             font-weight: 600;
         }
         
         .property-summary-info p {
             margin: 0;
-            font-size: 14px;
+            font-size: 15px;
             color: #4a5568;
         }
         
         .property-summary-info .address {
-            font-size: 13px;
+            font-size: 14px;
             color: #718096;
         }
         
         .property-summary-info .price {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             color: #2d3748;
             margin-top: 5px;
         }
         
         .property-summary-info .amenities-list {
-            font-size: 13px;
+            font-size: 14px;
             color: #4a5568;
         }
         
-        .property-summary-info .spots-left {
+        .property-summary-info .amenities-list span {
+            font-size: 16px;
+            margin-right: 5px;
+            color: #6366f1;
+        }
+        
+        .property-summary-info .max-tenants-display {
             font-weight: 600;
             color: #e91e63;
-            /* Red for urgency */
         }
         
         .terms-link {
             font-size: 14px;
             color: #7fc29b;
             text-decoration: none;
-            margin-top: 10px;
+            margin-top: 15px;
             display: block;
+            text-align: center;
+            font-weight: 500;
         }
-        /* Buttons at the bottom of the right column */
+        
+        .terms-link:hover {
+            text-decoration: underline;
+        }
         
         .booking-actions {
             display: flex;
+            flex-direction: column;
             gap: 15px;
-            margin-top: auto;
-            /* Push buttons to the bottom */
-            padding-top: 15px;
-            border-top: 1px solid #eef2f6;
+            margin-top: 25px;
+            width: 100%;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        .booking-actions button {
-            flex: 1;
-            padding: 12px 15px;
-            border-radius: 8px;
-            font-size: 16px;
+        .booking-actions .action-button {
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            white-space: nowrap;
-            /* Prevent button text from wrapping too early */
-        }
-        
-        .booking-actions .book-now-btn {
-            background-color: #7fc29b;
-            /* Main accent color */
-            color: white;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
             border: none;
+            text-align: center;
+            text-decoration: none;
+            display: block;
         }
         
-        .booking-actions .book-now-btn:hover {
+        .booking-actions .book-now {
+            background-color: #7fc29b;
+            color: white;
+            box-shadow: 0 4px 8px rgba(127, 194, 155, 0.3);
+        }
+        
+        .booking-actions .book-now:hover {
             background-color: #63a780;
         }
         
-        .booking-actions .message-host-btn {
-            background-color: white;
-            color: #4a5568;
-            border: 1px solid #cbd5e0;
+        .booking-actions .message-host {
+            background-color: transparent;
+            color: #7fc29b;
+            border: 2px solid #7fc29b;
+            box-shadow: none;
         }
         
-        .booking-actions .message-host-btn:hover {
-            background-color: #f7fafc;
+        .booking-actions .message-host:hover {
+            background-color: #e6f7ef;
         }
-        /* Error Messages (from Django forms) */
+        /* Modal Styles */
         
-        .errorlist {
-            color: #e53e3e;
-            /* Red color for errors */
-            font-size: 0.875em;
-            list-style-type: none;
-            padding: 0;
-            margin-top: 5px;
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 2000;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+            justify-content: center;
+            /* Center horizontally */
+            align-items: center;
+            /* Center vertically */
         }
         
-        .errorlist li {
-            margin-bottom: 5px;
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            /* Centered */
+            padding: 30px;
+            border: 1px solid #888;
+            width: 90%;
+            /* Could be more responsive */
+            max-width: 500px;
+            /* Max width */
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
         }
-        /* Responsive adjustments */
         
-        @media (max-width: 768px) {
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Responsive */
+        
+        @media (max-width: 900px) {
             .booking-card {
                 flex-direction: column;
-                padding: 0;
-                /* Remove padding from card itself to let children control it */
+                height: auto;
+                /* Remove fixed height when columns stack */
+                max-height: none;
             }
-            .booking-left,
-            .booking-right {
-                padding: 20px;
-                min-width: unset;
+            .booking-left-panel,
+            .booking-right-panel {
+                flex: none;
                 width: 100%;
                 border-left: none;
+                overflow-y: visible;
+                /* Disable scrolling when stacked */
+                height: auto;
+                /* Remove fixed height when stacked */
             }
-            .booking-right {
-                border-top: 1px solid #eef2f6;
-                /* Add top border when stacked */
+            .booking-right-panel {
+                border-top: 1px solid #e0e0e0;
+                padding: 25px;
             }
-            .booking-actions {
-                flex-direction: column;
-                /* Stack buttons vertically */
-                gap: 10px;
+            .property-summary-card {
+                max-width: 100%;
             }
         }
         
-        @media (max-width: 480px) {
-            .booking-left,
-            .booking-right {
-                padding: 15px;
+        @media (max-width: 600px) {
+            .booking-form-container {
+                padding: 20px 10px;
+            }
+            .booking-left-panel,
+            .booking-right-panel {
+                padding: 20px;
+            }
+            .booking-left-panel h2 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+            .booking-form label {
+                font-size: 14px;
+                margin-bottom: 5px;
             }
             .booking-form input,
             .booking-form textarea,
-            .booking-actions button {
+            .booking-form select {
+                padding: 10px 12px;
+                font-size: 15px;
+            }
+            .property-summary-info h4 {
+                font-size: 18px;
+            }
+            .property-summary-info p {
                 font-size: 14px;
-                padding: 8px 10px;
+            }
+            .booking-actions .action-button {
+                font-size: 16px;
+                padding: 12px 15px;
+            }
+            .modal-content {
+                padding: 20px;
             }
         }
+        
+        @media (max-width: 400px) {
+            .booking-left-panel h2 {
+                font-size: 20px;
+            }
+        }
+
+        .occupant-form-card .delete-checkbox .remove-occupant-btn {
+            background-color: #e53e3e; /* Red color for delete/remove */
+            color: white;
+            border: none;
+                                                padding: 8px 12px;
+                                                border-radius: 6px;
+                                                cursor: pointer;
+                                                font-size: 14px;
+                                                font-weight: 500;
+                                                transition: background-color 0.3s ease;
+                                            }
+
+                                            .occupant-form-card .delete-checkbox .remove-occupant-btn:hover {
+                                                background-color: #c53030; /* Darker red on hover */
+                                            }
     </style>
 </head>
 
 <body>
-    <!-- Header Section (reusing from combined CSS) -->
+    <!-- Header Section -->
     <header class="header">
         <div class="header-left">
             <a href="{% url 'users:property_detail' pk=property.pk %}" class="back-link">
-                <!-- SVG for back arrow icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>                Back to details
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>                Back to details
             </a>
         </div>
         <div class="page-title">Booking Form</div>
         <div class="header-right">
-            <a href="#">
-                <img class="logo-icon" src="{% static 'img/Chat Button.svg' %}" alt="Chat" width="40" height="40">
-            </a>
+            <button id="openChatPopupBtn" class="header-button profile" type="button" style="background-color: #f1e4fc; color: #9c27b0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-2.2c-.3-.4-.6-.8-.8-1.3A8.5 8.5 0 0 1 12 3a8.5 8.5 0 0 1 9 8.5z"></path></svg>
+            </button>
             <div class="profile-menu">
-                <a href="#" id="menu-button">
-                    <img class="logo-icon" src="{% static 'img/Menu Button.svg' %}" alt="Menu" width="120" height="40">
-                </a>
-                <div class="profile-dropdown" id="menu-dropdown">
+                <button class="header-button profile">👤</button>
+                <div class="profile-dropdown">
                     {% if user.is_authenticated %}
                     <a href="#">My Profile</a>
-                    <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
-
+                    <a href="{% url 'login:logout' %}">Sign Out</a> {% else %}
+                    <a href="{% url 'login:login' %}">Log In</a> {% endif %}
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Booking Container -->
-    <div class="booking-container">
+    <div class="booking-form-container">
         <div class="booking-card">
-            <div class="booking-left">
-                <form method="post" class="booking-form">
-                    {% csrf_token %} {# Display non-field errors if any #} {% if form.non_field_errors %}
+            <div class="booking-left-panel">
+                <h2>Booking Form</h2>
+                {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <form method="post" class="booking-form" id="bookingForm">
+                    {% csrf_token %} {# Display non-field errors for the main form #} {% if form.non_field_errors %}
                     <ul class="errorlist">
                         {% for error in form.non_field_errors %}
                         <li>{{ error }}</li>
@@ -316,77 +618,179 @@
                     </ul>
                     {% endif %}
 
-                    <div class="form-group">
-                        <label for="{{ form.full_name_on_form.id_for_label }}">Full Name :</label> {{ form.full_name_on_form }} {% if form.full_name_on_form.errors %}
-                        <ul class="errorlist">{% for error in form.full_name_on_form.errors %}
-                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="{{ form.student_id_number.id_for_label }}">Student ID / Matriculation Number :</label> {{ form.student_id_number }} {% if form.student_id_number.errors %}
-                        <ul class="errorlist">{% for error in form.student_id_number.errors %}
-                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="{{ form.email_on_form.id_for_label }}">Email Address :</label> {{ form.email_on_form }} {% if form.email_on_form.errors %}
-                        <ul class="errorlist">{% for error in form.email_on_form.errors %}
-                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="{{ form.current_address_on_form.id_for_label }}">Current Address :</label> {{ form.current_address_on_form }} {% if form.current_address_on_form.errors %}
-                        <ul class="errorlist">{% for error in form.current_address_on_form.errors %}
-                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="{{ form.university_name_on_form.id_for_label }}">University / College Name :</label> {{ form.university_name_on_form }} {% if form.university_name_on_form.errors %}
-                        <ul class="errorlist">{% for error in form.university_name_on_form.errors %}
-                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="{{ form.expected_duration_of_stay.id_for_label }}">Expected Duration of Stay :</label> {{ form.expected_duration_of_stay }} {% if form.expected_duration_of_stay.errors %}
-                        <ul class="errorlist">{% for error in form.expected_duration_of_stay.errors %}
-                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="{{ form.start_date.id_for_label }}">Expected Move-in Date :</label> {{ form.start_date }} {% if form.start_date.errors %}
-                        <ul class="errorlist">{% for error in form.start_date.errors %}
-                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="{{ form.end_date.id_for_label }}">Expected Move-out Date :</label> {{ form.end_date }} {% if form.end_date.errors %}
-                        <ul class="errorlist">{% for error in form.end_date.errors %}
-                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="{{ form.spots_booked.id_for_label }}">Spots / Rooms to Book :</label> {{ form.spots_booked }} {% if form.spots_booked.errors %}
-                        <ul class="errorlist">{% for error in form.spots_booked.errors %}
-                            <li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-                        <small>{{ form.spots_booked.help_text }}</small>
+                    <div class="form-section">
+                        <h3>Your Details (Primary Booker)</h3>
+                        <div class="form-group">
+                            {{ form.full_name_on_form.label_tag }} {{ form.full_name_on_form }} {% if form.full_name_on_form.help_text %}
+                            <small>{{ form.full_name_on_form.help_text }}</small> {% endif %} {% if form.full_name_on_form.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.full_name_on_form.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.gender_on_form.label_tag }}
+                            {{ form.gender_on_form }}
+                            {% if form.gender_on_form.help_text %}<small>{{ form.gender_on_form.help_text }}</small>{% endif %}
+                            {% if form.gender_on_form.errors %}<ul class="errorlist">{% for error in form.gender_on_form.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.student_id_number.label_tag }} {{ form.student_id_number }} {% if form.student_id_number.help_text %}
+                            <small>{{ form.student_id_number.help_text }}</small> {% endif %} {% if form.student_id_number.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.student_id_number.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.email_on_form.label_tag }} {{ form.email_on_form }} {% if form.email_on_form.help_text %}
+                            <small>{{ form.email_on_form.help_text }}</small> {% endif %} {% if form.email_on_form.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.email_on_form.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.current_address_on_form.label_tag }} {{ form.current_address_on_form }} {% if form.current_address_on_form.help_text %}
+                            <small>{{ form.current_address_on_form.help_text }}</small> {% endif %} {% if form.current_address_on_form.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.current_address_on_form.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.university_name_on_form.label_tag }} {{ form.university_name_on_form }} {% if form.university_name_on_form.help_text %}
+                            <small>{{ form.university_name_on_form.help_text }}</small> {% endif %} {% if form.university_name_on_form.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.university_name_on_form.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.expected_duration_of_stay.label_tag }} {{ form.expected_duration_of_stay }} {% if form.expected_duration_of_stay.help_text %}
+                            <small>{{ form.expected_duration_of_stay.help_text }}</small> {% endif %} {% if form.expected_duration_of_stay.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.expected_duration_of_stay.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
                     </div>
 
-                    {# Hidden fields for property and owner, set in view #} {# <input type="hidden" name="property" value="{{ property.pk }}"> #} {# <input type="hidden" name="tenant" value="{{ request.user.pk }}"> #}
+                    <div class="form-section">
+                        <h3>Booking Dates & Occupants</h3>
+                        <div class="form-group">
+                            {{ form.start_date.label_tag }}
+                            {{ form.start_date }}
+                            {% if form.start_date.help_text %}<small>{{ form.start_date.help_text }}</small>{% endif %}
+                            {% if form.start_date.errors %}<ul class="errorlist">{% for error in form.start_date.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                        </div>
+                        {# This hidden input for number_of_occupants will now be managed by the formset #}
+                        <input type="hidden" name="number_of_occupants" id="id_number_of_occupants" value="{{ form.number_of_occupants.value|default:1 }}">
+                    </div>
 
-                    <div class="booking-actions">
-                        <button type="submit" class="book-now-btn">Book Now</button>
-                        <button type="button" class="message-host-btn">Message Host</button>
+                    <div class="form-section">
+                        <h3>Additional Occupants</h3>
+                        {# Render the formset's management form (CRITICAL for formsets) #}
+                        <div id="formset-management-fields-container" style="display: none;"> {# Hidden by default #}
+                            {{ occupant_formset.management_form }}
+                        </div>
+
+                        {# Display non-field errors for the formset #} {% if occupant_formset.non_form_errors %}
+                        <ul class="errorlist">
+                            {% for error in occupant_formset.non_form_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+
+                        <div id="formset-container">
+                            <!-- Existing or dynamically added occupant forms will go here -->
+                            {% for form_in_set in occupant_formset %}
+                            <div class="occupant-form-card" id="occupant-form-{{ forloop.counter0 }}" data-form-index="{{ forloop.counter0 }}">
+                                <h4>Occupant {{ forloop.counter|add:1 }}:</h4> {# Occupant 1 is primary booker, so start additional from 2 #}
+                                {% if form_in_set.non_field_errors %}
+                                <ul class="errorlist">
+                                    {% for error in form_in_set.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %} {% for field in form_in_set %} {# Exclude the DELETE field here, it's handled separately #} {% if field.name != 'DELETE' %}
+                                <div class="form-group">
+                                    {{ field.label_tag }} {{ field }} {% if field.errors %}
+                                    <ul class="errorlist">{% for error in field.errors %}
+                                        <li>{{ error }}</li>{% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </div>
+                                {% endif %} {% endfor %} {% if occupant_formset.can_delete %}
+                                <div class="form-group delete-checkbox">
+                                    {{ form_in_set.DELETE.label_tag }} {{ form_in_set.DELETE }} {# Hidden DELETE checkbox #}
+                                    <button type="button" class="remove-occupant-btn" data-form-index="{{ forloop.counter0 }}">Remove</button>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" id="add-occupant-btn" class="action-button message-host" style="margin-top: 15px; margin-left: 0; width: fit-content;">+ Add Another Occupant</button>
+                    </div>
+
+                    <div class="booking-actions" style="margin-top: 30px;">
+                        <button type="submit" class="action-button book-now">Book Now</button>
+                        <a href="{% url 'users:chat_with_user' property_pk=property.pk other_user_pk=property.owner.pk %}" class="action-button message-host" style="margin-bottom: 40px;">Message Host</a>
                     </div>
                 </form>
             </div>
 
-            <div class="booking-right">
+            <div class="booking-right-panel">
                 <div class="property-summary-card">
                     <div class="image-container">
                         {% if property.main_image %}
-                        <img src="{{ property.main_image }}" alt="{{ property.title }}"> {% else %}
-                        <img src="https://placehold.co/400x240/e2e8f0/718096?text=No+Image" alt="No Image Available"> {% endif %}
+                            {% if property.main_image.url|slice:"7:12" == "https" %}
+                                <img src="{{ property.main_image }}" alt="{{ property.title }}" class="property-image" onerror="this.onerror=null;this.src='https://placehold.co/400x240/e2e8f0/718096?text=Image+Error'; console.error('Failed to load external image (likely CORS or invalid URL): {{ property.main_image.url }}');">
+                            {% else %}
+                                <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="property-image" onerror="this.onerror=null;this.src='https://placehold.co/400x240/e2e8f0/718096?text=Image+Error'; console.error('Failed to load local image (check MEDIA_ROOT/MEDIA_URL settings or file existence): {{ property.main_image.url }}');">
+                            {% endif %} {% else %}
+                            <img src="https://placehold.co/800x500/e2e8f0/718096?text=No+Image+Available" alt="No Image Available"> {% endif %}
                     </div>
                     <div class="property-summary-info">
                         <h4>{{ property.title }}</h4>
                         <p class="address">{{ property.address|linebreaksbr }}</p>
-                        <p>{{ property.house_type }} - {{ property.number_of_rooms }} Room{% if property.number_of_rooms != 1 %}s{% endif %} ({{ property.available_spots }} Room{% if property.available_spots != 1 %}s{% endif %} Left)</p>
-                        <p class="price">RM {{ property.rent }} per Month/Room</p>
-                        <p class="price">RM {{ property.rent|add:"800" }} Deposit</p> {# Example deposit calculation, adjust as needed #}
+                        <p>{{ property.house_type }}{% if property.bedrooms %}, {{ property.bedrooms }} Bedroom{% if property.bedrooms != 1 %}s{% endif %}{% endif %}</p>
+                        <p class="price">RM {{ property.rent }} / Month</p>
+                        <p class="price">Deposit: RM {{ property.rent|add:"500" }} + Security Deposit: RM 80</p>
                         <p class="amenities-list">
-                            {% for amenity in property.amenities.all %} {{ amenity.name }}{% if not forloop.last %}, {% endif %} {% empty %} No amenities listed. {% endfor %}
+                            Amenities: {% for amenity in property.amenities.all %}
+                            <span class="amenity-icon">
+                                    {% if amenity.name == 'Wifi' %}📶
+                                    {% elif amenity.name == 'TV' %}📺
+                                    {% elif amenity.name == 'Dedicated workspace' %}🖥️
+                                    {% elif amenity.name == 'Elevator' %}⬆️⬇️
+                                    {% elif amenity.name == 'Free parking on premises' %}🅿️
+                                    {% elif amenity.name == 'Washer' %}🧺
+                                    {% elif amenity.name == 'Pool' %}🏊
+                                    {% elif amenity.name == 'Air conditioning' %}❄️
+                                    {% elif amenity.name == 'Shared sauna' %}🧖‍♀️
+                                    {% else %}✨
+                                    {% endif %}
+                                </span> {{ amenity.name }}{% if not forloop.last %},{% endif %} {% empty %} No amenities listed. {% endfor %}
+                        </p>
+                        <p class="max-tenants-display">
+                            Max {{ property.max_tenants }} Occupant{% if property.max_tenants != 1 %}s{% endif %}
+                        </p>
+                        <p class="gender-preferred-display">
+                            Gender Preference: {{ property.get_gender_preferred_display }}
                         </p>
                         <a href="#" class="terms-link">Read Terms & Condition and Agreement of Rental</a>
                     </div>
@@ -394,23 +798,232 @@
             </div>
         </div>
     </div>
+
+    <!-- Hidden template for new empty occupant forms -->
+    <div id="empty-form-template" style="display: none;">
+        <div class="occupant-form-card">
+            {# The h4 text will be updated by JS #}
+            <h4>Occupant Placeholder:</h4>
+            <div class="form-group">
+                <label for="id_occupants-__prefix__-full_name">Full name:</label>
+                <input type="text" name="occupants-__prefix__-full_name" id="id_occupants-__prefix__-full_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="id_occupants-__prefix__-gender">Gender:</label>
+                <select name="occupants-__prefix__-gender" id="id_occupants-__prefix__-gender" class="form-control" required>
+                    {# Options will be dynamically populated by JS #}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_occupants-__prefix__-student_id_number">Student ID / Matriculation Number:</label>
+                <input type="text" name="occupants-__prefix__-student_id_number" id="id_occupants-__prefix__-student_id_number" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="id_occupants-__prefix__-email">Email address:</label>
+                <input type="email" name="occupants-__prefix__-email" id="id_occupants-__prefix__-email" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="id_occupants-__prefix__-phone_number">Phone number:</label>
+                <input type="text" name="occupants-__prefix__-phone_number" id="id_occupants-__prefix__-phone_number" class="form-control" required>
+            </div>
+            <input type="hidden" name="occupants-__prefix__-id" id="id_occupants-__prefix__-id">
+            <input type="hidden" name="occupants-__prefix__-DELETE" id="id_occupants-__prefix__-DELETE" value="false">
+            <div class="form-group delete-checkbox">
+                <label for="id_occupants-__prefix__-DELETE">Remove:</label>
+                <input type="checkbox" name="occupants-__prefix__-DELETE" id="id_occupants-__prefix__-DELETE" class="hidden-delete-checkbox"> {# This checkbox will be controlled by the button #}
+                <button type="button" class="remove-occupant-btn" data-form-index="__prefix__">Remove</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    {# The json_script tag should be rendered here, outside the main script block #} {{ GENDER_CHOICES|json_script:"gender-choices-data" }} {# Pass max_tenants to JavaScript #} {{ MAX_TENANTS_JS|json_script:"max-tenants-data" }}
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const menuButton = document.getElementById('menu-button');
-            const dropdown = document.getElementById('menu-dropdown');
+            // --- Profile Dropdown Logic (Copied from other templates for consistency) ---
+            const profileMenuButton = document.querySelector('.header-button.profile');
+            const profileDropdown = document.querySelector('.profile-dropdown');
 
-            menuButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                dropdown.classList.toggle('show');
-            });
+            if (profileMenuButton && profileDropdown) {
+                profileMenuButton.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    profileDropdown.classList.toggle('show');
+                });
 
-            window.addEventListener('click', function(e) {
-                if (!menuButton.contains(e.target) && !dropdown.contains(e.target)) {
-                    dropdown.classList.remove('show');
+                document.addEventListener('click', function(event) {
+                    if (!profileMenuButton.contains(event.target) && !profileDropdown.contains(event.target)) {
+                        profileDropdown.classList.remove('show');
+                    }
+                });
+            }
+            // --- End Profile Dropdown Logic ---
+
+            // --- Dynamic Additional Occupants Formset Logic ---
+            const totalFormsInput = document.querySelector('input[name="occupants-TOTAL_FORMS"]');
+            const initialFormsInput = document.querySelector('input[name="occupants-INITIAL_FORMS"]');
+            const occupantsContainer = document.getElementById('formset-container');
+            const addOccupantButton = document.getElementById('add-occupant-btn');
+            const emptyFormTemplate = document.getElementById('empty-form-template');
+            const numberOfOccupantsHiddenInput = document.getElementById('id_number_of_occupants'); // The main booking form's hidden field
+
+            // Retrieve GENDER_CHOICES from context for dynamic form rendering
+            // FIX: Correctly access the content of the script tag generated by json_script
+            const GENDER_CHOICES = JSON.parse(document.getElementById('gender_choices').textContent);
+            const MAX_PROPERTY_TENANTS = {{ property.max_tenants|default:1 }}; // Max tenants from property detail, default to 1
+
+            let currentFormCount = parseInt(totalFormsInput.value); // Tracks number of additional forms currently displayed (initially from Django's pre-rendered formset)
+
+            // Function to update the hidden number_of_occupants field
+            function updateNumberOfOccupantsHiddenField() {
+                // Primary booker is always 1, plus the number of active additional occupant forms
+                numberOfOccupantsHiddenInput.value = 1 + getActiveOccupantFormsCount();
+                console.log("Updated hidden number_of_occupants to:", numberOfOccupantsHiddenInput.value);
+            }
+
+            // Function to get the count of active (not marked for deletion) additional occupant forms
+            function getActiveOccupantFormsCount() {
+                // This counts how many occupant-form-card elements are NOT marked for deletion.
+                // We need to count based on the number of actual forms, including those that might be
+                // marked for deletion if they were previously saved.
+                return occupantsContainer.querySelectorAll('.occupant-form-card:not([style*="display: none"])').length;
+            }
+
+
+            // Function to add a new empty additional occupant form
+            function addOccupantForm() {
+                // Check against the property's max_tenants (primary booker + additional occupants)
+                if ((1 + getActiveOccupantFormsCount()) >= MAX_PROPERTY_TENANTS) {
+                    // Instead of alert, provide user feedback through a custom modal or message.
+                    alert(`Cannot add more occupants. This property has a maximum of ${MAX_PROPERTY_TENANTS} tenant(s).`);
+                    return;
                 }
-            });
+
+                const newForm = emptyFormTemplate.firstElementChild.cloneNode(true);
+                const prefix = currentFormCount;
+
+                // Update IDs and names in the cloned form
+                newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, prefix);
+                newForm.id = `occupant-form-${prefix}`;
+                newForm.setAttribute('data-form-index', prefix); // Add data-form-index for easy access
+                newForm.querySelector('h4').textContent = `Occupant ${prefix + 1}:`; // Update occupant number
+
+                // Populate gender select options
+                const genderSelect = newForm.querySelector(`[name="occupants-${prefix}-gender"]`);
+                if (genderSelect) {
+                    genderSelect.innerHTML = GENDER_CHOICES.map(choice => `<option value="${choice[0]}">${choice[1]}</option>`).join('');
+                }
+
+                occupantsContainer.appendChild(newForm);
+
+                // Update TOTAL_FORMS
+                currentFormCount++;
+                totalFormsInput.value = currentFormCount;
+
+                updateNumberOfOccupantsHiddenField();
+                attachRemoveButtonListener(newForm); // Attach listener to the new form's remove button
+            }
+
+            // Function to handle removing an occupant form
+            function removeOccupantForm(event) {
+                const button = event.target;
+                const formCard = button.closest('.occupant-form-card');
+                if (!formCard) return;
+
+                const formIndex = formCard.getAttribute('data-form-index');
+                const deleteCheckbox = formCard.querySelector(`input[name="occupants-${formIndex}-DELETE"]`);
+
+                if (deleteCheckbox) {
+                    deleteCheckbox.value = "true"; // Mark for deletion
+                    formCard.style.display = 'none'; // Hide the form visually
+                } else {
+                    formCard.remove(); // If it's a newly added form with no ID, just remove it from DOM
+                }
+
+                updateNumberOfOccupantsHiddenField();
+                // We don't decrement currentFormCount (totalFormsInput.value) here if it's an existing form,
+                // because Django's formset needs to know the original total for processing deletions.
+                // If we remove a newly added form (no ID, no DELETE checkbox), then currentFormCount is implicitly correct.
+                // Re-indexing existing forms is complex and usually not necessary for Django formsets as long as TOTAL_FORMS is correct.
+            }
+
+            // Attach event listener to add occupant button
+            addOccupantButton.addEventListener('click', addOccupantForm);
+
+            // Attach event listeners to all existing remove buttons
+            function attachRemoveButtonListener(formElement) {
+                const removeBtn = formElement.querySelector('.remove-occupant-btn');
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', removeOccupantForm);
+                }
+            }
+
+            // Attach listeners to any forms pre-rendered by Django (on initial load or re-render after validation error)
+            document.querySelectorAll('.occupant-form-card').forEach(attachRemoveButtonListener);
+
+            // Initial population of main form fields if they are empty
+            function populateInitialValues() {
+                const mainFormFields = [{
+                        id: 'id_full_name_on_form',
+                        value: '{{ form.full_name_on_form.value|escapejs }}'
+                    },
+                    {
+                        id: 'id_email_on_form',
+                        value: '{{ form.email_on_form.value|escapejs }}'
+                    },
+                    {
+                        id: 'id_gender_on_form',
+                        value: '{{ form.gender_on_form.value|escapejs }}'
+                    },
+                    {
+                        id: 'id_student_id_number',
+                        value: '{{ form.student_id_number.value|escapejs }}'
+                    },
+                    {
+                        id: 'id_current_address_on_form',
+                        value: '{{ form.current_address_on_form.value|escapejs }}'
+                    },
+                    {
+                        id: 'id_university_name_on_form',
+                        value: '{{ form.university_name_on_form.value|escapejs }}'
+                    },
+                    {
+                        id: 'id_expected_duration_of_stay',
+                        value: '{{ form.expected_duration_of_stay.value|escapejs }}'
+                    },
+                    {
+                        id: 'id_start_date',
+                        value: '{{ form.start_date.value|escapejs }}'
+                    },
+                ];
+
+                mainFormFields.forEach(fieldInfo => {
+                    const fieldElement = document.getElementById(fieldInfo.id);
+                    if (fieldElement && fieldInfo.value) {
+                        // Only set if the field is currently empty or has a default
+                        // Avoid overwriting user input that might be partial
+                        if (!fieldElement.value || fieldElement.value === fieldElement.defaultValue) {
+                            fieldElement.value = fieldInfo.value;
+                        }
+                    }
+                });
+
+                // For the gender select in the empty form template, pre-populate options
+                const emptyGenderSelect = emptyFormTemplate.querySelector('select');
+                if (emptyGenderSelect) {
+                    emptyGenderSelect.innerHTML = GENDER_CHOICES.map(choice => `<option value="${choice[0]}">${choice[1]}</option>`).join('');
+                }
+            }
+
+            // Call to initialize:
+            populateInitialValues(); // Populate main form fields
+            updateNumberOfOccupantsHiddenField(); // Set initial hidden occupant count based on pre-rendered forms
+
         });
     </script>
+    {# Add the json_script tag here, so JavaScript can access its content #}
+    {{ GENDER_CHOICES|json_script:"gender_choices" }}
+    <script src="{% static 'js/main.js' %}"></script>
 </body>
 
 </html>
