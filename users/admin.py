@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import AdditionalOccupant, CustomUser, Property, Amenity,Booking, ChatMessage, MaintenanceRequest 
+from .models import AdditionalOccupant, CustomUser, PaymentRecord, Property, Amenity,Booking, ChatMessage, MaintenanceRequest 
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -115,3 +115,21 @@ class MaintenanceRequestAdmin(admin.ModelAdmin):
     search_fields = ('issue_title', 'issue_description', 'property__title', 'submitted_by__username')
     raw_id_fields = ('property', 'submitted_by')
     date_hierarchy = 'submitted_date'
+    
+    # --- NEW: PaymentRecord Admin ---
+@admin.register(PaymentRecord)
+class PaymentRecordAdmin(admin.ModelAdmin):
+    # Added 'receiver_of_payment' to list_display
+    list_display = ('full_name', 'email', 'amount', 'payment_date', 'user', 'booking', 'receiver_of_payment', 'transaction_id', 'payment_method')
+    list_filter = ('payment_date', 'payment_method', 'user', 'booking', 'receiver_of_payment') # Added receiver to filter
+    search_fields = ('full_name', 'email', 'transaction_id', 'user__username', 'booking__property__title', 'receiver_of_payment__username') # Added receiver to search
+    # Added receiver_of_payment to raw_id_fields
+    raw_id_fields = ('user', 'booking', 'receiver_of_payment')
+    date_hierarchy = 'payment_date'
+    readonly_fields = ('payment_date', 'transaction_id', 'receiver_of_payment') # transaction_id is generated
+    fieldsets = (
+        (None, {'fields': ('full_name', 'email', 'phone_number', 'amount', 'payment_method')}),
+        # Added receiver_of_payment to Related Records
+        ('Related Records', {'fields': ('user', 'booking', 'receiver_of_payment', 'transaction_id')}),
+        ('Timestamp', {'fields': ('payment_date',)}),
+    )

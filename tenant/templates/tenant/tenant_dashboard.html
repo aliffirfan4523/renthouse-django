@@ -531,7 +531,44 @@
             flex-shrink: 0;
         }
         /* Payment History Card */
-
+        .payment-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .payment-list li {
+            background-color: #f7fafc;
+            padding: 22px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        .payment-list li:last-child {
+            margin-bottom: 0;
+        }
+        .payment-item-details {
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+        .payment-item-details strong {
+            color: #2d3748;
+        }
+        .payment-item-amount {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3748;
+            text-align: right;
+        }
+        .payment-item-status {
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+            background-color: #e6fffa; /* Green for paid */
+            color: #38a169;
+        }
         .payment-status {
             font-size: 18px;
             font-weight: 600;
@@ -718,7 +755,8 @@
             <span class="logo-text" style="color: {{ logo_text_color }};">RentUrHouse</span>
         </div>
         <div class="header-middle">
-            {# Add your main navigation links here if you have any #}
+            <a class="logo-text" style="color: {{ logo_text_color }};" href="{% url 'users:home' %}">Homepage</a> | 
+            <a class="logo-text" style="color: {{ logo_text_color }};" href="{% url 'tenant:tenant_home' %}">My House</a>
         </div>
         <div class="header-right">
             <button id="openChatPopupBtn" class="header-button profile" style="background-color: #f1e4fc; color: #9c27b0;">
@@ -871,16 +909,38 @@
                     <a href="{% url 'users:home' %}" class="contact-link" style="text-align: center;">Find Properties to Chat</a>
                     {% endif %}
                 </div>
-            </div>
+
 
             <!-- Payment History Card (Placeholder) -->
-            <div class="dashboard-column">
-                <div class="dashboard-card">
-                    <h2>Payment History</h2>
-                    <p class="payment-status">Next payment due: July 1, 2025</p>
-                    <p class="empty-state-message">No detailed payment history available yet.</p>
-                    <a href="#" class="payment-action-btn">Make a Payment</a>
-                </div>
+            <div class="dashboard-card">
+                <h2>My Payment History</h2>
+                {% if my_payments %}
+                    <ul class="payment-list">
+                        {% for payment in my_payments %}
+                            <li>
+                                <div class="payment-item-details">
+                                    <strong>Amount:</strong> RM {{ payment.amount }}<br>
+                                    <strong>Date:</strong> {{ payment.payment_date|date:"F d, Y P" }}<br>
+                                    <strong>Transaction ID:</strong> {{ payment.transaction_id }}<br>
+                                    {% if payment.booking %}
+                                        <strong>For Booking:</strong> #{{ payment.booking.pk }} ({{ payment.booking.property.title }})<br>
+                                    {% endif %}
+                                    {% if payment.receiver_of_payment %}
+                                        <strong>Paid To:</strong> {{ payment.receiver_of_payment.full_name|default:payment.receiver_of_payment.username }}<br>
+                                    {% endif %}
+                                    <strong>Method:</strong> {{ payment.payment_method }}
+                                </div>
+                                <span class="payment-item-status">Paid</span> {# Assuming all displayed are 'paid' #}
+                                <a href="{% url 'users:receipt' pk=payment.pk %}" class="payment-action-btn" style="margin-top: 10px;">View Receipt</a>
+                            </li>
+                        {% endfor %}
+                        <a href="{% url 'users:payment' %}" class="payment-action-btn" style="text-align: center;">Make a Payment</a>
+                    </ul>
+                {% else %}
+                    <p class="empty-state-message">You have not made any payments yet.</p>
+                    <a href="{% url 'users:payment' %}" class="payment-action-btn" style="text-align: center;">Make a Payment</a>
+                {% endif %}
+            </div>
             </div>
         </div>
     </div>

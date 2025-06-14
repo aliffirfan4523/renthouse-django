@@ -1,18 +1,21 @@
+from decimal import Decimal
 import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView
 from django.db.models import Q # Used for complex queries
 # IMPORTANT: Import AdditionalOccupant model
-from .models import Property, CustomUser, Booking, ChatMessage, AdditionalOccupant 
+from .models import PaymentRecord, Property, CustomUser, Booking, ChatMessage, AdditionalOccupant 
 # IMPORTANT: Ensure AdditionalOccupantFormSet is imported (from forms.py)
-from .forms import AdditionalOccupantFormSet, BookingForm, MessageForm 
+from .forms import AdditionalOccupantFormSet, BookingForm, MessageForm, PaymentForm 
 from django.contrib import messages # For Django messages framework
 from django.contrib.auth.mixins import LoginRequiredMixin # For class-based view login requirement
 from django.contrib.auth.decorators import login_required # For function-based view login requirement
 from django.urls import reverse # To dynamically get URL patterns
-from django.http import JsonResponse # For API responses
-from datetime import date # Import date for validation
-
+from django.http import HttpResponse, JsonResponse # For API responses
+from datetime import date, datetime # Import date and datetime for validation
+from django.utils import timezone  # Correct import for timezone.now()
+import pdfkit
+from django.template.loader import render_to_string # Import render_to_string
 
 # --- HomePropertyListView ---
 class HomePropertyListView(ListView):
@@ -106,6 +109,20 @@ def book_property(request, pk):
         messages.error(request, "Please log in as a student to book a property.")
         return redirect('login:login')
 
+    # NEW VALIDATION: Restrict user from booking more than 1 house
+    # Check for existing 'pending' or 'confirmed' bookings by the current user
+    existing_bookings = Booking.objects.filter(
+        tenant=request.user,
+        status__in=['pending', 'confirmed']
+    )
+    if existing_bookings.exists():
+        messages.error(request, "You already have a pending or confirmed booking. You can only have one active booking at a time.")
+        # Redirect to their dashboard or home page
+        if request.user.role == 'student':
+            return redirect('tenant:tenant_home')
+        else: # For superusers, they might not have a specific dashboard like students
+            return redirect('users:home')
+        
     if request.method == 'POST':
         # Always initialize forms and formsets with POST data on submission
         form = BookingForm(request.POST)
@@ -329,3 +346,141 @@ def recent_chats_api_view(request):
     chats_data.sort(key=lambda x: x['last_message_timestamp'], reverse=True)
 
     return JsonResponse({'chats': chats_data})
+
+# --- PAYMENT VIEWS ---
+
+# --- PAYMENT VIEWS ---
+
+def payment_view(request):
+    """
+    Handles the payment form submission and saves the payment record to the database.
+    Allows selection of receiver and specific booking.
+    The transaction ID is generated based on datetime, payment_id, and user_id.
+    """
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        
+        # Manually set querysets for ModelChoiceFields on POST if form is not bound
+        # This is important if form is invalid and needs to be re-rendered
+        form.fields['receiver_of_payment'].queryset = CustomUser.objects.filter(Q(role='owner'))
+        # Dynamically set booking queryset based on user role
+        if request.user.is_authenticated and request.user.role == 'student':
+            form.fields['booking'].queryset = Booking.objects.filter(
+                Q(tenant=request.user) & Q(status__in=['confirmed', 'completed'])
+            ).order_by('-start_date')
+        elif request.user.is_authenticated and (request.user.role == 'owner' or request.user.role == 'admin'):
+            form.fields['booking'].queryset = Booking.objects.filter(
+                Q(property__owner=request.user) & Q(status__in=['confirmed', 'completed'])
+            ).order_by('-start_date')
+        else: # For anonymous users, no booking association is made through the form
+            form.fields['booking'].queryset = Booking.objects.none()
+
+
+        if form.is_valid():
+            payment_record = form.save(commit=False)
+            
+            # Set the user who made the payment if authenticated
+            if request.user.is_authenticated:
+                payment_record.user = request.user
+            
+            # booking and receiver_of_payment are now directly from form.cleaned_data
+            # because they are ModelChoiceFields
+            payment_record.booking = form.cleaned_data.get('booking')
+            payment_record.receiver_of_payment = form.cleaned_data.get('receiver_of_payment')
+
+            payment_record.save() # Save the payment record to get its primary key (ID)
+
+            # Generate transaction ID after saving to get the payment_record.id
+            now = timezone.now()
+            user_id_str = str(request.user.pk) if request.user.is_authenticated else 'GUEST'
+            transaction_id_parts = [
+                now.strftime('%Y%m%d%H%M%S%f'), # Datetime (Y-M-D H-M-S microseconds)
+                str(payment_record.pk),       # PaymentRecord ID
+                user_id_str                   # User ID or GUEST
+            ]
+            payment_record.transaction_id = "_".join(transaction_id_parts)
+            payment_record.save(update_fields=['transaction_id']) # Save just the transaction_id
+
+            messages.success(request, "Payment successful! Here is your receipt.")
+            return redirect('users:receipt', pk=payment_record.pk)
+        else:
+            messages.error(request, "Please correct the errors in the payment form.")
+    else: # GET request
+        initial_data = {}
+        if request.user.is_authenticated:
+            initial_data['full_name'] = request.user.full_name or ''
+            initial_data['email'] = request.user.email or ''
+            initial_data['phone_number'] = request.user.phone_number or ''
+        
+        form = PaymentForm(initial=initial_data)
+
+        # Set queryset for receiver_of_payment field
+        form.fields['receiver_of_payment'].queryset = CustomUser.objects.filter(Q(role='owner'))
+
+        # Dynamically set queryset for booking field based on user role
+        if request.user.is_authenticated and request.user.role == 'student':
+            form.fields['booking'].queryset = Booking.objects.filter(
+                Q(tenant=request.user) & Q(status__in=['confirmed', 'completed'])
+            ).order_by('-start_date')
+        elif request.user.is_authenticated and (request.user.role == 'owner' or request.user.role == 'admin'):
+            # owner/Admins can see bookings for their properties
+            form.fields['booking'].queryset = Booking.objects.filter(
+                Q(property__owner=request.user) & Q(status__in=['confirmed', 'completed'])
+            ).order_by('-start_date')
+        else:
+            form.fields['booking'].queryset = Booking.objects.none() # No bookings for anonymous users
+
+    context = {
+        'form': form,
+        'logo_text_color': '#7fc29b',
+        'header_button_color': '#e91e63',
+    }
+    return render(request, 'payment.html', context)
+
+
+def receipt_view(request, pk):
+    """
+    Displays the payment receipt by retrieving the PaymentRecord from the database.
+    """
+    payment_record = get_object_or_404(PaymentRecord, pk=pk)
+
+    context = {
+        'payment_record': payment_record,
+        'logo_text_color': '#7fc29b',
+        'header_button_color': '#e91e63',
+    }
+    return render(request, 'receipt.html', context)
+
+
+def receipt_pdf_view(request, pk):
+    """
+    Generates a PDF receipt for a PaymentRecord using pdfkit (wkhtmltopdf).
+    """
+    try:
+        pass
+    except ImportError:
+        messages.error(request, "PDF generation libraries not installed. Please install pdfkit (pip install pdfkit) and wkhtmltopdf.")
+        return redirect('users:receipt', pk=pk)
+
+    payment_record = get_object_or_404(PaymentRecord, pk=pk)
+
+    template_path = 'receipt.html'
+    context = {'payment_record': payment_record}
+
+    html = render_to_string(template_path, context)
+
+    options = {
+        'enable-local-file-access': None,
+        'encoding': "UTF-8",
+    }
+
+    try:
+        pdf = pdfkit.from_string(html, False, options=options)
+    except Exception as e:
+        messages.error(request, f"Error generating PDF: {e}. Ensure wkhtmltopdf is installed and in your system's PATH. You might need to configure its path in options.")
+        return redirect('users:receipt', pk=pk)
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="receipt_{payment_record.pk}.pdf"'
+    return response
+

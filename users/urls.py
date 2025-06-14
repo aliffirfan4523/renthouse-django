@@ -1,6 +1,7 @@
 
+from django import views
 from django.urls import path
-from .views import HomePropertyListView, HomePropertyListView, PropertyDetailView, book_property, move_in_notice, chat_view, recent_chats_api_view 
+from .views import HomePropertyListView, HomePropertyListView, PropertyDetailView, book_property, move_in_notice, chat_view, payment_view, receipt_pdf_view, receipt_view, recent_chats_api_view 
 
 app_name = 'users'
 
@@ -12,5 +13,7 @@ urlpatterns = [
     path('booking/<int:booking_pk>/notice/', move_in_notice, name='move_in_notice'), # NEW Move-in Notice URL
     path('property/<int:property_pk>/chat/<int:other_user_pk>/', chat_view, name='chat_with_user'), # NEW Chat URL
     path('api/recent-chats/', recent_chats_api_view, name='recent_chats_api'), # NEW API URL
-
+    path('payment/', payment_view, name='payment'),
+    path('receipt/<int:pk>/', receipt_view, name='receipt'),
+    path('receipt/<int:pk>/pdf/', receipt_pdf_view, name='receipt_pdf'),
 ]

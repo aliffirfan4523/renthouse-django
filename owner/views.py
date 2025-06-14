@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, DetailView
 from django.contrib import messages
-from users.models import Property, Booking, MaintenanceRequest, ChatMessage, CustomUser, PropertyForm # Import all necessary models
+from users.models import PaymentRecord, Property, Booking, MaintenanceRequest, ChatMessage, CustomUser, PropertyForm # Import all necessary models
 from django.db.models import Q # Q object for complex queries
 from django.urls import reverse # To dynamically get URL patterns
 from datetime import date # For current date comparisons
@@ -44,6 +44,11 @@ def owner_dashboard(request):
         property__owner=request.user # Filter requests related to current owner's properties
     ).order_by('-submitted_date') # Order by most recent submission
 
+     # --- Received Payments (NEW) ---
+    my_received_payments = PaymentRecord.objects.filter(
+        receiver_of_payment=request.user
+    ).order_by('-payment_date').select_related('user', 'booking') # Select related user and booking
+    
     # --- Recent Chats ---
     # Similar logic as in users.views.recent_chats_api_view to get unique conversations
     recent_chats_data = []
@@ -87,6 +92,7 @@ def owner_dashboard(request):
         'pending_bookings': pending_bookings,
         'all_owner_bookings': all_owner_bookings,
         'owner_maintenance_requests': owner_maintenance_requests,
+        'my_received_payments': my_received_payments, # Add received payments to context
         'recent_chats_data': recent_chats_data,
         'logo_text_color': '#7fc29b',
         'header_button_color': '#e91e63',

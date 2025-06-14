@@ -375,3 +375,28 @@ class PropertyForm(forms.ModelForm):
             'square_footage', 'main_image', 'max_tenants', 'gender_preferred', 'amenities'
         ]
         # owner and is_available will be set in the view
+
+# --- NEW MODEL: PaymentRecord ---
+class PaymentRecord(models.Model):
+    id = models.AutoField(primary_key=True)
+    # Link to the user who made the payment (optional if anonymous payments are allowed)
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='payment_records')
+    # If the payment is for a specific booking, link it
+    booking = models.ForeignKey(Booking, on_delete=models.SET_NULL, null=True, blank=True, related_name='payment_records')
+    # NEW FIELD: Who received the payment (e.g., the owner of the property for a booking)
+    receiver_of_payment = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='received_payments', help_text="The user who is the ultimate recipient of this payment (e.g., owner).")
+
+    full_name = models.CharField(max_length=100, help_text="Full name of the person making the payment.")
+    email = models.EmailField(max_length=100, help_text="Email address of the person making the payment.")
+    phone_number = models.CharField(max_length=20, blank=True, null=True, help_text="Phone number of the person making the payment.")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Amount paid.")
+    payment_date = models.DateTimeField(default=timezone.now, help_text="Date and time the payment was recorded.")
+    transaction_id = models.CharField(max_length=255, unique=True, blank=True, null=True, help_text="Unique transaction ID from payment gateway.")
+    payment_method = models.CharField(max_length=50, blank=True, null=True, help_text="e.g., Credit Card, Bank Transfer, Online Wallet.")
+
+    class Meta:
+        verbose_name_plural = "Payment Records"
+        ordering = ['-payment_date'] # Order by most recent payment
+
+    def __str__(self):
+        return f"Payment of RM{self.amount} by {self.full_name} on {self.payment_date.strftime('%Y-%m-%d')}"

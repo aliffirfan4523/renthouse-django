@@ -2,12 +2,10 @@
 
 from datetime import date, timedelta
 from django import forms
-from .models import AdditionalOccupant, Booking, ChatMessage, CustomUser, MaintenanceRequest, Property
+from .models import AdditionalOccupant, Booking, ChatMessage, CustomUser, MaintenanceRequest, PaymentRecord, Property
 from django.forms.widgets import DateInput
 from django.core.exceptions import ValidationError # Import ValidationError for custom errors
 
-# Booking Form (MODIFIED: fields moved to Meta class)
-# --- Booking Form (MODIFIED: Removed redundant fields, will be handled by occupant_details) ---
 class BookingForm(forms.ModelForm):
     # Retrieve choices from CustomUser model
     GENDER_CHOICES = CustomUser.GENDER_CHOICES
@@ -109,9 +107,6 @@ class BookingForm(forms.ModelForm):
 
 # --- NEW: Form for an individual additional occupant's details ---
 class AdditionalOccupantForm(forms.ModelForm):
-    # GENDER_CHOICES are now directly on the ModelForm from AdditionalOccupant model
-    # which inherits from CustomUser.GENDER_CHOICES via its model field definition.
-    
     class Meta:
         model = AdditionalOccupant # <--- IMPORTANT: Link to the new AdditionalOccupant model
         fields = ['full_name', 'student_id_number', 'email', 'phone_number', 'gender']
@@ -137,9 +132,6 @@ AdditionalOccupantFormSet = forms.modelformset_factory(
     extra=0, # Start with 0 extra forms
     can_delete=True, # Allow deletion of forms
 )
-
-
-
 
 
 class MessageForm(forms.ModelForm):
@@ -171,3 +163,54 @@ class MaintenanceRequestForm(forms.ModelForm):
             'issue_description': 'Description',
             'priority': 'Priority Level',
         }
+        
+# --- NEW: PaymentForm as a ModelForm ---
+class PaymentForm(forms.ModelForm):
+    # ModelChoiceField for selecting the receiver of payment (owner/Admin)
+    # The queryset will be dynamically set in the view
+    receiver_of_payment = forms.ModelChoiceField(
+        queryset=None, # Set to None initially, will be populated in view
+        required=True,
+        label="Receiver of Payment (Owner)",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    # ModelChoiceField for selecting a booking, allowing for linking payments to specific bookings
+    # The queryset will be dynamically set in the view
+    booking = forms.ModelChoiceField(
+        queryset=None, # Set to None initially, will be populated in view
+        required=False, # Make it optional if a payment might not be tied to a specific booking
+        label="Related Booking (Optional)",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    class Meta:
+        model = PaymentRecord
+        # Exclude 'receiver_of_payment' and 'booking' from fields as they are defined explicitly above
+        fields = ['full_name', 'email', 'phone_number', 'amount', 'payment_method']
+        widgets = {
+            'full_name': forms.TextInput(attrs={'placeholder': 'Full Name on Card/Account', 'class': 'form-input'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Email Address', 'class': 'form-input'}),
+            'phone_number': forms.TextInput(attrs={'placeholder': 'Phone Number (Optional)', 'class': 'form-input'}),
+            'amount': forms.NumberInput(attrs={'placeholder': 'Amount to Pay', 'class': 'form-input', 'step': '0.01'}),
+            'payment_method': forms.Select(choices=[
+                ('Credit Card', 'Credit Card'),
+                ('Debit Card', 'Debit Card'),
+                ('Bank Transfer', 'Bank Transfer'),
+                ('Online Wallet', 'Online Wallet'),
+                ('Other', 'Other'),
+            ], attrs={'class': 'form-select'}),
+        }
+        labels = {
+            'full_name': 'Name on Card/Account',
+            'email': 'Email for Receipt',
+            'phone_number': 'Phone Number',
+            'amount': 'Payment Amount (RM)',
+            'payment_method': 'Payment Method',
+        }
+
+    def clean_amount(self):
+        amount = self.cleaned_data['amount']
+        if amount <= 0:
+            raise forms.ValidationError("Amount must be a positive number.")
+        return amount

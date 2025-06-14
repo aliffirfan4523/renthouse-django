@@ -15,3 +15,12 @@ python manage.py migrate
 -create a superuser if want to access admin dashboard
 
 python manage.py createsuperuser
+
+STEPS TO IMPORT DATA USING MYSQL WORKBENCH
+
+-OPEN MYSQL WORKBENCH
+-LOGIN USING USERS 
+-SELECT ADMINISTRATION>DATA IMPORT
+-INSIDE IMPORT OPTIONS CHOOSE IMPORT FROM SELF-CONTAINED FILE
+-select default target schema to renthouse
+-scroll down then click start import

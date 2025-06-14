@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from users.models import Booking, MaintenanceRequest, Property, ChatMessage
+from users.models import Booking, MaintenanceRequest, PaymentRecord, Property, ChatMessage
 from django.db.models import Q
 from django.urls import reverse
 import datetime
@@ -74,12 +74,19 @@ def tenant_dashboard(request):
             'link': reverse('users:chat_with_user', args=[msg.property.pk if msg.property else 0, other_participant.pk])
         })
 
+    # --- My Payment History (NEW) ---
+    my_payments = PaymentRecord.objects.filter(
+        user=request.user # Payments made by the current user
+    ).order_by('-payment_date').select_related('booking', 'receiver_of_payment')
+
+
     context = {
         'current_rental': current_rental,
         'all_bookings': all_bookings,
         'past_bookings': past_bookings,
         'my_maintenance_requests': my_maintenance_requests,
         'recent_chats_data': recent_chats_data,
+        'my_payments': my_payments, # Add payment history to context
         'logo_text_color': '#7fc29b',
         'header_button_color': '#e91e63',
     }
