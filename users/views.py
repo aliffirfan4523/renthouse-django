@@ -79,7 +79,18 @@ class HomePropertyListView(ListView):
         context['header_button_color'] = '#e91e63' # Example dynamic styling
         return context
 
-
+def property_detail_view(request, property_pk):
+    property_obj = get_object_or_404(Property, pk=property_pk)
+    
+    # Check if the user has an active booking (confirmed or pending)
+    is_active_tenant = Booking.objects.filter(tenant=request.user, status__in=['confirmed', 'pending']).exists()
+    
+    context = {
+        'property': property_obj,
+        'is_active_tenant': is_active_tenant,
+        # Add other context data here
+    }
+    return render(request, 'users/chat_page.html', context)
 # --- PropertyDetailView ---
 class PropertyDetailView(DetailView):
     """
@@ -247,6 +258,7 @@ def chat_view(request, property_pk, other_user_pk):
     """
     property_obj = get_object_or_404(Property, pk=property_pk)
     target_user = get_object_or_404(CustomUser, pk=other_user_pk)
+    is_active_tenant = Booking.objects.filter(tenant=request.user, status='confirmed').exists()
 
     is_authorized = False
     # Scenario 1: owner (logged-in user) is chatting with a student (target user)
@@ -302,6 +314,8 @@ def chat_view(request, property_pk, other_user_pk):
         'form': form,
         'logo_text_color': '#7fc29b',
         'header_button_color': '#e91e63',
+        'is_active_tenant': is_active_tenant,
+        'is_current_user_owner': request.user == property_obj.owner,
         'is_current_user_owner': is_current_user_owner,
     }
     return render(request, 'chat_page.html', context)

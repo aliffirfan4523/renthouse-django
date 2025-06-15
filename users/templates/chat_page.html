@@ -404,9 +404,14 @@
 
                         <p>Select unit: [Dropdown]</p> {# Placeholder: This likely needs specific booking logic #}
                         <p>Payment method: [Dropdown]</p> {# Placeholder: This likely needs specific booking logic #}
-                        <button class="action-button book-now">Confirm booking</button> {# Placeholder for owner to confirm #}
-                        <button class="action-button chat-owner" id="requestViewingBtn">Request Viewing</button> {# Re-added ID for JS #}
-                    </div>
+
+
+                        {% if not is_active_tenant %}
+                        <button class="action-button book-now">Confirm Booking</button>
+                    {% endif %}
+                
+                    <button class="action-button chat-owner" id="requestViewingBtn">Request Viewing</button>
+                </div>
                 </div>
             </div>
             {% endif %} {# End of is_current_user_owner check #}
