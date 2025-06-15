@@ -762,8 +762,7 @@
                 <img src="{{ property.main_image }}" alt="{{ property.title }}" class="property-image" onerror="this.onerror=null;this.src='https://placehold.co/400x240/e2e8f0/718096?text=Image+Error'; console.error('Failed to load external image (likely CORS or invalid URL): {{ property.main_image.url }}');">
             {% else %}
                 <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="property-image" onerror="this.onerror=null;this.src='https://placehold.co/400x240/e2e8f0/718096?text=Image+Error'; console.error('Failed to load local image (check MEDIA_ROOT/MEDIA_URL settings or file existence): {{ property.main_image.url }}');">
-            {% endif %}
-            <img src="https://placehold.co/800x500/e2e8f0/718096?text=No+Image+Available" alt="No Image Available"> {% endif %}
+            {% endif %}{% endif %}
             <!-- Add more images using property.images.all if you implement PropertyImage model -->
             <!-- Navigation arrows (functional via JS, not implemented in this HTML-only version) -->
             <button class="gallery-nav prev" aria-label="Previous image">&#10094;</button>
