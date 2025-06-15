@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Sign Up | RentUrHouse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main_app.css' %}">
+    <style>
+        /* Reusing and adapting login page styles for signup forms */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .signup-page-body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 80px); /* Adjust for header if it's there */
+            padding: 20px;
+            box-sizing: border-box;
+            flex-grow: 1;
+            background-color: var(--background-color); /* Apply theme background */
+            transition: background-color 0.3s ease;
+        }
+
+        .signup-container {
+            background-color: rgb(206, 160, 110);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease;
+        }
+
+        .signup-container h2 {
+            color: var(--header-text-color);
+            margin-bottom: 30px;
+            font-size: 28px;
+            transition: color 0.3s ease;
+        }
+
+        .signup-form .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .signup-form label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--label-text-color);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .signup-form input[type="text"],
+        .signup-form input[type="email"],
+        .signup-form input[type="password"],
+        .signup-form input[type="tel"], /* For phone_number */
+        .signup-form select { /* For gender */
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            color: var(--input-text-color);
+            background-color: #fff;
+            transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .signup-form input:focus,
+        .signup-form select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.2);
+        }
+
+        .signup-button-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--button-background-color);
+            color: rgb(109, 100, 87);
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .signup-button-primary:hover {
+            color: rgb(254, 199, 111);
+            background-color: var(--button-hover-background-color);
+        }
+
+        .form-links {
+            margin-top: 25px;
+            font-size: 15px;
+            color: var(--link-text-color);
+        }
+
+        .form-links a {
+            color: var(--link-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-links a:hover {
+            text-decoration: underline;
+        }
+
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .messages li {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .messages .success {
+            background-color: #e6fffa;
+            color: #38a169;
+            border: 1px solid #9ae6b4;
+        }
+
+        .messages .error {
+            background-color: #ffe6e6;
+            color: #e53e3e;
+            border: 1px solid #fbb6ce;
+        }
+
+        .messages .info {
+            background-color: #ebf8ff;
+            color: #3182ce;
+            border: 1px solid #90cdf4;
+        }
+        /* Using the theme classes defined in main_app.css or directly in login.html */
+    </style>
+</head>
+<body class="signup-page-body {{ theme_class }}">
+    <div class="signup-container">
+        <h2>Owner Sign Up</h2>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post" class="signup-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="signup-button-primary">Sign Up as Owner</button>
+        </form>
+
+        <div class="form-links">
+            <p>Already have an account? <a href="{% url 'login:login' %}?role=owner">Log In as Owner</a></p>
+            {# NEW LINK: Option to sign up as a Owner #}
+            <p style="margin-top: 15px;">Are you a student? <a href="{% url 'signup:student_signup_view' %}">Sign Up as Student</a></p>
+        </div>
+    </div>
+</body>
+</html>

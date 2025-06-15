@@ -400,3 +400,4 @@ class PaymentRecord(models.Model):
 
     def __str__(self):
         return f"Payment of RM{self.amount} by {self.full_name} on {self.payment_date.strftime('%Y-%m-%d')}"
+    

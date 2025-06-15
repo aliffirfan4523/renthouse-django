@@ -484,3 +484,6 @@ def receipt_pdf_view(request, pk):
     response['Content-Disposition'] = f'attachment; filename="receipt_{payment_record.pk}.pdf"'
     return response
 
+def signup(request, pk):
+    return render(request, "signup.html")
+

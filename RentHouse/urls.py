@@ -25,7 +25,9 @@ urlpatterns = [
     path('Tenant/', include('tenant.urls',namespace='tenant')),   
     path('login/', include('login.urls', namespace='login')),
     path('', include('users.urls')),
-    path('owner/', include('owner.urls', namespace='owner'))
+    path('owner/', include('owner.urls', namespace='owner')),
+    path('signup/', include('signup.urls', namespace='signup'))
+
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
