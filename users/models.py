@@ -235,9 +235,9 @@ class ChatMessage(models.Model):
 
 class MaintenanceRequest(models.Model):
     STATUS_CHOICES = [
-        ('new', 'New'),
+        ('pending', 'Pending'),
         ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
+        ('done', 'Done'),
         ('rejected', 'Rejected'),
     ]
     PRIORITY_CHOICES = [
@@ -253,7 +253,7 @@ class MaintenanceRequest(models.Model):
     issue_title = models.CharField(max_length=200)
     issue_description = models.TextField()
     submitted_date = models.DateTimeField(default=timezone.now)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
     resolved_date = models.DateTimeField(null=True, blank=True)
     resolution_notes = models.TextField(blank=True, null=True)
