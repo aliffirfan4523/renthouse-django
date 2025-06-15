@@ -133,7 +133,6 @@ class Property(models.Model):
         ('Studio', 'Studio'),
     ]
     GENDER_PREFERENCE_CHOICES = (
-        ('any', 'Any'),
         ('male', 'Male'),
         ('female', 'Female'),
     )

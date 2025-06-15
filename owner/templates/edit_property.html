@@ -1,0 +1,291 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Property: {{ property.title }} | RentUrHouse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main_app.css' %}"> {# Your combined CSS #}
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: var(--background-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-radius: 0 0 10px 10px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: var(--background-light);
+            border-radius: 15px;
+            box-shadow: var(--box-shadow);
+            flex-grow: 1;
+        }
+
+        h2 {
+            color: var(--text-color-dark);
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            display: block; /* Ensures border spans full width */
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color-medium);
+            font-size: 15px;
+        }
+
+        .form-group .form-input,
+        .form-group .form-select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            color: var(--text-color-dark);
+            background-color: var(--background-light);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-group .form-input:focus,
+        .form-group .form-select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 127, 194, 155), 0.3);
+        }
+
+        .form-group .form-input-file {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+            background-color: var(--background-light);
+        }
+
+        .form-group .form-checkbox {
+            margin-right: 10px;
+            transform: scale(1.2);
+            accent-color: var(--primary-color);
+        }
+
+        .form-group .form-checkbox-multiple label {
+            display: inline-block; /* Keep checkboxes and labels inline */
+            margin-right: 15px;
+            font-weight: normal; /* Override bold from main label */
+            color: var(--text-color-medium);
+        }
+
+        .form-group .errorlist {
+            list-style: none;
+            padding: 0;
+            margin-top: 5px;
+            color: var(--error-color);
+            font-size: 0.875rem;
+        }
+
+        .form-actions {
+            margin-top: 30px;
+            text-align: right;
+        }
+
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: #63a780;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 10px rgba(var(--primary-color-rgb, 127, 194, 155), 0.3);
+        }
+
+        .submit-btn:hover {
+            background-color: #63a780;
+            color: #63a780;
+            box-shadow: 0 6px 12px rgba(var(--primary-color-rgb, 127, 194, 155), 0.4);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--link-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 20px;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--button-hover-background-color); /* Use a darker shade of primary for hover */
+            text-decoration: none;
+        }
+
+        .back-link svg {
+            margin-right: 5px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px auto;
+                padding: 20px;
+                border-radius: 10px;
+            }
+            h2 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+            .form-group label {
+                font-size: 14px;
+            }
+            .form-group .form-input,
+            .form-group .form-select,
+            .form-group textarea {
+                padding: 10px;
+                font-size: 15px;
+            }
+            .submit-btn {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+                box-shadow: none; /* Remove shadow on very small screens */
+                border-radius: 0;
+            }
+            h2 {
+                font-size: 20px;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+            }
+            .form-group .form-checkbox-multiple label {
+                display: block; /* Stack checkboxes on very small screens */
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section (Assuming it's included or you manually add it) -->
+    <header class="header">
+        <div class="header-left">
+            <a href="{% url 'owner:owner_dashboard' %}" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg> Back to Dashboard
+            </a>
+        </div>
+        <div class="page-title">Edit Property</div>
+        <div class="header-right">
+            <div class="profile-menu">
+                <a href="#" id="menu-button">
+                    <img class="logo-icon" src="{% static 'img/Menu Button.svg' %}" alt="Menu" width="120" height="40">
+                </a>
+                <div class="profile-dropdown" id="menu-dropdown">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <h2>Edit Property: {{ property.title }}</h2>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data"> {# Add enctype for file uploads #}
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %} <span style="color: red;">*</span>{% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="text-gray-500 text-sm">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+
+    {# Include your chat popup partial if applicable #}
+    {% if user.is_authenticated %} {% include 'partials/chat_popup.html' %} {% endif %}
+
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profile dropdown logic
+            const menuButton = document.querySelector('.profile-menu .header-button.profile');
+            const profileDropdown = document.querySelector('.profile-menu .profile-dropdown');
+
+            if (menuButton && profileDropdown) {
+                menuButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    profileDropdown.classList.toggle('show');
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!profileDropdown.contains(event.target) && !menuButton.contains(event.target)) {
+                        profileDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

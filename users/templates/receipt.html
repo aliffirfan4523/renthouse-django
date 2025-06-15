@@ -259,7 +259,7 @@
     <!-- Header Section -->
     <header class="header">
         <div class="header-left">
-            <a href="{% url 'users:home' %}" class="back-link flex items-center text-gray-600 font-medium">
+            <a href="{% url 'tenant:tenant_home' %}" class="back-link flex items-center text-gray-600 font-medium">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left mr-1">
                     <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
@@ -274,7 +274,7 @@
                 <div class="profile-menu">
                     <button class="header-button profile" id="menu-button">👤</button>
                     <div class="profile-dropdown" id="menu-dropdown">
-                        <a href="#">My Profile</a>
+                         
                         <a href="{% url 'login:logout' %}">Sign Out</a>
                     </div>
                 </div>
@@ -308,7 +308,7 @@
                 {% endif %}
                 <p><strong>Amount Paid:</strong> RM {{ payment_record.amount }}</p>
                 <p><strong>Payment Method:</strong> {{ payment_record.payment_method }}</p>
-                <p><strong>Date:</strong> {{ payment_record.payment_date|date:"F d, Y P" }}</p>
+                <p><strong>Date:</strong> {{ payment_record.payment_date|date:"F d, Y " }}</p>
                 {% if payment_record.user %}
                     <p><strong>Paid By User:</strong> {{ payment_record.user.username }}</p>
                 {% endif %}

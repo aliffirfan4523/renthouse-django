@@ -10,6 +10,7 @@ urlpatterns = [
     path('dashboard/<int:pk>/', views.PropertyPreView.as_view(), name='property_detail'),
      path('dashboard/<int:req_id>/', views.owner_dashboard, name='owner_dashboard_with_req_id'),  # Add this for `req_id`
     path('add-property', views.add_property, name='add_property'), # Link to the new view
+    path('edit-property/<int:pk>/', views.edit_property, name='edit_property'), # NEW URL
     path('bookings/<int:booking_pk>/details/', views.view_booking_details, name='view_booking_details'),
     path('bookings/<int:booking_pk>/confirm/', views.confirm_booking, name='confirm_booking'),
     path('bookings/<int:booking_pk>/reject/', views.reject_booking, name='reject_booking'),

@@ -11,6 +11,7 @@
     />
     <link rel="stylesheet" href="{% static 'css/main_app.css' %}" />
     <link rel="stylesheet" href="{% static 'users/css/owner.css' %}" />
+    <script src="{% static 'js/main.js' %}"></script>
     {# Your combined CSS #}
     <style>
       /* Dashboard Specific Styles */
@@ -252,11 +253,15 @@
         background-color: #ffe0b2;
         color: #ff9800;
       }
+      .maintenance-request-list .status-priority .status-pending {
+        background-color: #f37921;
+        color: #ffffff;
+      }
       .maintenance-request-list .status-priority .status-in_progress {
         background-color: #bbdefb;
         color: #2196f3;
       }
-      .maintenance-request-list .status-priority .status-completed {
+      .maintenance-request-list .status-priority .status-done {
         background-color: #e6fffa;
         color: #38a169;
       }
@@ -557,7 +562,7 @@
           </a>
           <div class="profile-dropdown" id="menu-dropdown">
             {% if user.is_authenticated %}
-            <a href="#">My Profile</a>
+             
             <a href="{% url 'login:logout' %}">Sign Out</a>{% else %}
             <a href="{% url 'login:login' %}">Log In</a> {% endif %}
           </div>
@@ -605,12 +610,12 @@
                     class="view-listing"
                     >View Listing</a
                   >
-                  <a href="#" class="edit-listing">Edit</a> 
+                  <a href="{% url 'owner:edit_property' pk=property.pk %}" class="edit-property">Edit</a>
                 </div>
               </li>
               {% endfor %}
             </ul>
-            <a href="#" class="add-property-btn">Add New Property</a>  {% else %}
+            <a href="{% url 'owner:add_property'%}" class="add-property-btn">Add New Property</a>  {% else %}
             <p class="empty-state-message">
               You don't have any properties listed yet.
             </p>
@@ -671,19 +676,19 @@
               <span class="status-{{ req.status }}">{{ req.get_status_display }}</span>
               <span class="priority-{{ req.priority }}">{{ req.get_priority_display }} Priority</span>
           </div>
-          <small style="display: block; text-align: right; color: #a0aec0">
-              Submitted: {{ req.submitted_date|date:"F d, Y P" }}
-          </small>
+            <small style="display: block; text-align: right; color: #a0aec0; padding: 12px 0;">
+              Submitted: {{ req.submitted_date|date:"F d, Y " }}
+            </small>
 
-          <!-- Resolution Notes Section (Always visible if there are notes) -->
-          {% if req.resolution_notes %}
-          <div class="resolve-note">
+            <!-- Resolution Notes Section (Always visible if there are notes) -->
+            {% if req.resolution_notes %}
+            <div class="resolve-note" style="padding: 12px 0;">
               <p><strong>Action Taken:</strong> {{ req.resolution_notes }}</p>
               <small style="display: block; text-align: right; color: #a0aec0">
-                  Resolved: {{ req.resolved_date|date:"F d, Y P" }}
+                Resolved: {{ req.resolved_date|date:"F d, Y " }}
               </small>
-          </div>
-          {% endif %}
+            </div>
+            {% endif %}
 
           <!-- Always Show "Add Note" Button -->
           <div class="add-note-section">
@@ -695,13 +700,13 @@
               <form method="POST" action="{% url 'owner:resolve_note' req.id %}">
                   {% csrf_token %}
                   <!-- Resolve Note Input -->
-                  <div><label for="note-{{ req.id }}">Resolve note:</label></div>
+                  <div><h4 for="note-{{ req.id }}">Resolve note:</h4></div>
                   <textarea id="note-{{ req.id }}" name="resolution_notes" rows="3" placeholder="Enter resolution note" style="width: 100%;"></textarea>
 
                   <!-- Hidden Field for Status -->
                   <input type="hidden" id="status-{{ req.id }}" name="status" value="{{ req.status }}">
 
-                  <div><label for="status-{{ req.id }}">Status:</label></div>
+                  <div><h4 for="status-{{ req.id }}">Status:</h4></div>
                   <div class="maintenance-actions-mini">
                       {% for status_value, status_label in req.STATUS_CHOICES %}
                           {% if req.status != status_value %}
@@ -774,12 +779,12 @@
           <div class="dashboard-card">
                 <h2>Received Payments</h2>
                 {% if my_received_payments %}
-                    <ul class="payment-received-list">
+                    <ul class="payment-list">
                         {% for payment in my_received_payments %}
                             <li>
                                 <div class="payment-item-details">
                                     <strong>Amount:</strong> RM {{ payment.amount }}<br>
-                                    <strong>Date:</strong> {{ payment.payment_date|date:"F d, Y P" }}<br>
+                                    <strong>Date:</strong> {{ payment.payment_date|date:"F d, Y " }}<br>
                                     <strong>Transaction ID:</strong> {{ payment.transaction_id }}<br>
                                     <strong>From:</strong> {{ payment.user.full_name|default:payment.user.username }}<br>
                                     {% if payment.booking %}
@@ -788,7 +793,7 @@
                                     <strong>Method:</strong> {{ payment.payment_method }}
                                 </div>
                                 <span class="payment-item-status">Received</span>
-                                <a href="{% url 'users:receipt' pk=payment.pk %}" class="view-receipt-link">View Receipt</a>
+                                <a href="{% url 'users:receipt' pk=payment.pk %}" class="payment-action-btn">View Receipt</a>
                             </li>
                         {% endfor %}
                     </ul>

@@ -283,3 +283,35 @@ def resolve_note_view(request, req_id):
         return redirect('owner:owner_dashboard')  # Adjust the name of the view if necessary
 
     return JsonResponse({"success": False, "message": "Invalid request."})
+@login_required
+def edit_property(request, pk):
+    """
+    Allows a landlord (owner) to edit details of their property.
+    Only the property owner or an admin can access this view.
+    """
+    property_instance = get_object_or_404(Property, pk=pk)
+
+    # Authorization check
+    if not (request.user == property_instance.owner or request.user.is_superuser):
+        messages.error(request, "Access Denied. You are not authorized to edit this property.")
+        return redirect('landlord:landlord_dashboard') # Redirect to landlord dashboard or home
+
+    if request.method == 'POST':
+        # Pass request.FILES for image uploads
+        form = PropertyForm(request.POST, request.FILES, instance=property_instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Property '{property_instance.title}' updated successfully!")
+            return redirect('landlord:landlord_dashboard') # Redirect back to landlord dashboard
+        else:
+            messages.error(request, "Please correct the errors in the form.")
+    else: # GET request
+        form = PropertyForm(instance=property_instance) # Pre-fill form with existing data
+
+    context = {
+        'form': form,
+        'property': property_instance,
+        'logo_text_color': '#7fc29b',
+        'header_button_color': '#e91e63',
+    }
+    return render(request, 'edit_property.html', context)

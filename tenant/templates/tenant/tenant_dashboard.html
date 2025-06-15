@@ -8,6 +8,7 @@
     <title>Tenant Dashboard | RentUrHouse</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/main_app.css' %}"> {# Your combined CSS #}
+        <link rel="stylesheet" href="{% static 'users/css/owner.css' %}" />
     <script src="{% static 'js/main.js' %}"></script>
     <style>
         /* Base styles from previous version, kept for continuity */
@@ -149,12 +150,6 @@
         .dashboard-welcome p {
             color: #718096;
             font-size: 16px;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
         }
 
         .dashboard-card {
@@ -551,45 +546,15 @@
             margin-left: 10px;
             flex-shrink: 0;
         }
-        /* Payment History Card */
-        .payment-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .payment-list li {
-            background-color: #f7fafc;
-            padding: 22px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #e0e0e0;
-        }
-        .payment-list li:last-child {
-            margin-bottom: 0;
-        }
-        .payment-item-details {
-            font-size: 14px;
-            color: #4a5568;
-            margin-bottom: 15px;
-        }
-        .payment-item-details strong {
-            color: #2d3748;
-        }
+        
+        
         .payment-item-amount {
             font-size: 16px;
             font-weight: 700;
             color: #2d3748;
             text-align: right;
         }
-        .payment-item-status {
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: capitalize;
-            background-color: #e6fffa; /* Green for paid */
-            color: #38a169;
-        }
+        
         .payment-status {
             font-size: 18px;
             font-weight: 600;
@@ -597,23 +562,7 @@
             margin-bottom: 15px;
         }
 
-        .payment-action-btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s ease;
-            text-decoration: none;
-            text-align: center;
-            width: fit-content;
-        }
-
-        .payment-action-btn:hover {
-            background-color: #0056b3;
-        }
+        
         /* Message for empty states */
 
         .empty-state-message {
@@ -639,10 +588,6 @@
         }
 
         @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
             .dashboard-welcome h1 {
                 font-size: 24px;
             }
@@ -789,7 +734,7 @@
                 </a>
                 <div class="profile-dropdown" id="menu-dropdown">
                     {% if user.is_authenticated %}
-                    <a href="#">My Profile</a>
+                     
                     <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
                 </div>
             </div>
@@ -852,6 +797,36 @@
                     <p class="empty-state-message">You have no booking history.</p>
                     {% endif %}
                 </div>
+
+                <!-- Recent Chats Card -->
+                <div class="dashboard-card">
+                    <h2>Recent Chats</h2>
+                    {% if recent_chats_data %}
+                    <ul class="recent-chats-list">
+                        {% for chat in recent_chats_data %}
+                        <li>
+                            <a href="{{ chat.link }}">
+                                <div class="chat-list-avatar">
+                                    {# You might want to display a user avatar here if available #}
+                                    👤
+                                </div>
+                                <div class="chat-item-content">
+                                    <div class="chat-item-name">{{ chat.other_user.full_name|default:chat.other_user.username }}</div>
+                                    <div class="chat-item-property">{{ chat.property.title }}</div>
+                                    <div class="chat-item-message">
+                                        {% if chat.last_message_text|length > 30 %} {{ chat.last_message_text|slice:":30" }}... {% else %} {{ chat.last_message_text }} {% endif %}
+                                    </div>
+                                </div>
+                                <div class="chat-item-timestamp">{{ chat.last_message_timestamp|date:"P" }}</div>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="empty-state-message">No recent chats.</p>
+                    <a href="{% url 'users:home' %}" class="contact-link" style="text-align: center;">Find Properties to Chat</a>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Submit Maintenance Request Card -->
@@ -903,11 +878,19 @@
                                     <span class="status-{{ req.status }}">{{ req.get_status_display }}</span>
                                     <span class="priority-{{ req.priority }}">{{ req.get_priority_display }} Priority</span>
                                 </div>
+                                {% if req.resolution_notes %}
+                                <div class="resolve-note" style="padding: 12px 0;">
+                                <p><strong>Action Taken:</strong> {{ req.resolution_notes }}</p>
+                                <small style="display: block; text-align: right; color: #a0aec0">
+                                    Resolved: {{ req.resolved_date|date:"F d, Y " }}
+                                </small>
+                                </div>
+                                {% endif %}
                                 <form method="POST" action="{% url 'tenant:delete_maintenance_request' request_id=req.id %}" style="display:inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="delete-button" data-maintenance-id="{{ req.id }}">Delete</button>
                                 </form>
-                                <small style="display: block; text-align: right; color: #a0aec0;">Submitted: {{ req.submitted_date|date:"F d, Y P" }}</small>
+                                <small style="display: block; text-align: right; color: #a0aec0;">Submitted: {{ req.submitted_date|date:"F d, Y " }}</small>
                             </li>
                             {% endfor %}
                         </ul>
@@ -916,35 +899,7 @@
                     {% endif %}
                 </div>
 
-                <!-- Recent Chats Card -->
-                <div class="dashboard-card">
-                    <h2>Recent Chats</h2>
-                    {% if recent_chats_data %}
-                    <ul class="recent-chats-list">
-                        {% for chat in recent_chats_data %}
-                        <li>
-                            <a href="{{ chat.link }}">
-                                <div class="chat-list-avatar">
-                                    {# You might want to display a user avatar here if available #}
-                                    👤
-                                </div>
-                                <div class="chat-item-content">
-                                    <div class="chat-item-name">{{ chat.other_user.full_name|default:chat.other_user.username }}</div>
-                                    <div class="chat-item-property">{{ chat.property.title }}</div>
-                                    <div class="chat-item-message">
-                                        {% if chat.last_message_text|length > 30 %} {{ chat.last_message_text|slice:":30" }}... {% else %} {{ chat.last_message_text }} {% endif %}
-                                    </div>
-                                </div>
-                                <div class="chat-item-timestamp">{{ chat.last_message_timestamp|date:"P" }}</div>
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <p class="empty-state-message">No recent chats.</p>
-                    <a href="{% url 'users:home' %}" class="contact-link" style="text-align: center;">Find Properties to Chat</a>
-                    {% endif %}
-                </div>
+                
 
 
             <!-- Payment History Card (Placeholder) -->
@@ -956,7 +911,7 @@
                             <li>
                                 <div class="payment-item-details">
                                     <strong>Amount:</strong> RM {{ payment.amount }}<br>
-                                    <strong>Date:</strong> {{ payment.payment_date|date:"F d, Y P" }}<br>
+                                    <strong>Date:</strong> {{ payment.payment_date|date:"F d, Y " }}<br>
                                     <strong>Transaction ID:</strong> {{ payment.transaction_id }}<br>
                                     {% if payment.booking %}
                                         <strong>For Booking:</strong> #{{ payment.booking.pk }} ({{ payment.booking.property.title }})<br>

@@ -953,3 +953,57 @@ body {
     background: #fed7d7;
     border-color: #e53e3e;
   }
+
+.payment-item-details {
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+        .payment-item-details strong {
+            color: #2d3748;
+        }
+
+        /* Payment History Card */
+        .payment-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .payment-list li {
+            background-color: #f7fafc;
+            padding: 22px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        .payment-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .payment-item-status {
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+            background-color: #e6fffa; /* Green for paid */
+            color: #38a169;
+        }
+
+        .payment-action-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+            text-align: center;
+            width: fit-content;
+        }
+
+        .payment-action-btn:hover {
+            background-color: #0056b3;
+        }
