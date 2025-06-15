@@ -311,6 +311,8 @@
             background-color: #90caf9;
         }
 
+
+
         .booking-actions-mini .cancel-booking {
             background-color: #ffcdd2;
             color: #f44336;
@@ -390,6 +392,25 @@
             color: #4a5568;
         }
 
+
+
+        .maintenance-request-list .delete-button {
+            background-color: #ffcdd2;
+            color: #f44336;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            border: none; /* Remove default button border */
+            cursor: pointer;
+        }
+
+        .maintenance-request-list .delete-button:hover {
+            background-color: #ef9a9a;
+        }
+
         .maintenance-request-list .status-priority {
             font-size: 12px;
             display: flex;
@@ -403,7 +424,7 @@
             text-transform: capitalize;
         }
 
-        .maintenance-request-list .status-priority .status-new {
+        .maintenance-request-list .status-priority .status-pending {
             background-color: #ffe0b2;
             color: #ff9800;
         }
@@ -413,7 +434,7 @@
             color: #2196f3;
         }
 
-        .maintenance-request-list .status-priority .status-completed {
+        .maintenance-request-list .status-priority .status-done {
             background-color: #e6fffa;
             color: #38a169;
         }
@@ -846,37 +867,52 @@
                     {% endif %}
                     <div class="maintenance-form-section">
                         <form method="post">
-                            {% csrf_token %} {% for field in maintenance_form %}
+                            {% csrf_token %}
                             <div class="form-group">
-                                {{ field.label_tag }} {{ field }} {% if field.help_text %}
-                                <small class="text-muted">{{ field.help_text }}</small> {% endif %} {% if field.errors %}
-                                <ul class="errorlist">{% for error in field.errors %}
-                                    <li>{{ error }}</li>{% endfor %}
-                                </ul>
-                                {% endif %}
+                                <label for="issue_description">Describe the Issue:</label>
+                                <textarea id="issue_description" name="issue_description" rows="4" placeholder="Please describe the maintenance issue..." required>{{ form.issue_description.value }}</textarea>
                             </div>
-                            {% endfor %}
+                            
+                            <div class="form-group">
+                                <label for="issue_title">Title:</label>
+                                <input type="text" id="issue_title" name="issue_title" value="{{ maintenance_request.issue_title }}" required>
+                            </div>
+                    
+                            <div class="form-group">
+                                <label for="priority">Priority:</label>
+                                <select id="priority" name="priority">
+                                    <option value="low" {% if maintenance_request.priority == "low" %} selected {% endif %}>Low</option>
+                                    <option value="medium" {% if maintenance_request.priority == "medium" %} selected {% endif %}>Medium</option>
+                                    <option value="high" {% if maintenance_request.priority == "high" %} selected {% endif %}>High</option>
+                                </select>
+                            </div>
+                    
                             <button type="submit" name="submit_maintenance">Submit Request</button>
                         </form>
                     </div>
+                    
 
                     <h3>My Submitted Requests</h3>
                     {% if my_maintenance_requests %}
-                    <ul class="maintenance-request-list">
-                        {% for req in my_maintenance_requests %}
-                        <li>
-                            <h4>{{ req.issue_title }} (for {{ req.property.title }})</h4>
-                            <p>{{ req.issue_description|truncatechars:100 }}</p>
-                            <div class="status-priority">
-                                <span class="status-{{ req.status }}">{{ req.get_status_display }}</span>
-                                <span class="priority-{{ req.priority }}">{{ req.get_priority_display }} Priority</span>
-                            </div>
-                            <small style="display: block; text-align: right; color: #a0aec0;">Submitted: {{ req.submitted_date|date:"F d, Y P" }}</small>
-                        </li>
-                        {% endfor %}
-                    </ul>
+                        <ul class="maintenance-request-list">
+                            {% for req in my_maintenance_requests %}
+                            <li>
+                                <h4>{{ req.issue_title }}</h4>
+                                <p>{{ req.issue_description|truncatechars:100 }}</p>
+                                <div class="status-priority">
+                                    <span class="status-{{ req.status }}">{{ req.get_status_display }}</span>
+                                    <span class="priority-{{ req.priority }}">{{ req.get_priority_display }} Priority</span>
+                                </div>
+                                <form method="POST" action="{% url 'tenant:delete_maintenance_request' request_id=req.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-button" data-maintenance-id="{{ req.id }}">Delete</button>
+                                </form>
+                                <small style="display: block; text-align: right; color: #a0aec0;">Submitted: {{ req.submitted_date|date:"F d, Y P" }}</small>
+                            </li>
+                            {% endfor %}
+                        </ul>
                     {% else %}
-                    <p class="empty-state-message">No maintenance requests submitted yet.</p>
+                        <p class="empty-state-message">No maintenance requests submitted yet.</p>
                     {% endif %}
                 </div>
 

@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from users.models import Booking, MaintenanceRequest, PaymentRecord, Property, ChatMessage
 from django.db.models import Q
+from .forms import MaintenanceRequestForm
 from django.urls import reverse
+from django.utils import timezone
 import datetime
 
 @login_required
@@ -23,6 +25,47 @@ def tenant_dashboard(request):
         tenant=request.user,
         status='confirmed',
     ).order_by('-start_date').first()
+
+
+    # --- Maintenance Request Form Handling ---
+    if request.method == 'POST':
+        form = MaintenanceRequestForm(request.POST)
+                
+        # Check if the delete button is clicked
+        if 'delete_request' in request.POST:
+            maintenance_request_id = request.POST.get('delete_request')
+            maintenance_request = MaintenanceRequest.objects.filter(id=maintenance_request_id, submitted_by=request.user).first()
+            
+            if maintenance_request:
+                maintenance_request.delete()  # Delete the maintenance request
+                messages.success(request, "Maintenance request deleted successfully.")
+                return redirect('tenant:tenant_home')
+            
+        if form.is_valid():
+            # Save the maintenance request with the current property
+            maintenance_request = form.save(commit=False)
+            maintenance_request.submitted_by = request.user  # Assign the current user
+            maintenance_request.status = 'pending'  # Default status
+            maintenance_request.submitted_date = timezone.now()  # Default date
+            maintenance_request.property = current_rental.property  # Use the current rental's property
+            maintenance_request.save()
+            messages.success(request, "Maintenance request submitted successfully.")
+            return redirect('tenant:tenant_home')
+        else:
+            print("Form is not valid")
+            print(form.errors)  # This will print any errors from form validation
+    else:
+        form = MaintenanceRequestForm()
+
+        # Fetch all maintenance requests for the current user
+    my_maintenance_requests = MaintenanceRequest.objects.filter(submitted_by=request.user).order_by('-submitted_date')
+
+    context = {
+        'current_rental': current_rental,
+        'form': form,
+        'logo_text_color': '#7fc29b',
+        'header_button_color': '#e91e63',
+    }
 
     # --- Upcoming Bookings ---
     # --- All Bookings (Current, Upcoming, Past) ---
@@ -130,3 +173,20 @@ def move_in_notice(request, booking_pk):
         'header_button_color': '#e91e63',
     }
     return render(request, 'tenant/move_in_notice.html', context)
+
+
+@login_required
+def delete_maintenance_request(request, request_id):
+    # Fetch the maintenance request object by id
+    maintenance_request = get_object_or_404(MaintenanceRequest, id=request_id)
+
+    # Ensure the current user is the one who created the request
+    if maintenance_request.submitted_by != request.user:
+        messages.error(request, "You are not authorized to delete this request.")
+        return redirect('tenant:tenant_home')  # Redirect if user is not the one who created the request
+
+    # Delete the maintenance request
+    maintenance_request.delete()
+
+    messages.success(request, "Maintenance request deleted successfully.")
+    return redirect('tenant:tenant_home')
