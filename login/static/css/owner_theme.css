@@ -1,0 +1,219 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #ffffff;
+}
+
+
+/* Container layout */
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+
+/* Left panel (green) */
+
+.left {
+    flex: 1;
+    background-color: #cda06d;
+    color: white;
+    padding: 100px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.left h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.left p {
+    font-size: 18px;
+}
+
+
+/* Right panel (form) */
+
+.right {
+    flex: 1;
+    padding: 80px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #f9f9f9;
+}
+
+.right h2 {
+    color: #cda06d;
+    margin-bottom: 10px;
+}
+
+.card {
+    background-color: #cda06d;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card h3 {
+    margin-bottom: 20px;
+    color: white;
+    /* Ensure text color is white on green background */
+}
+
+.card h5 {
+    color: white;
+    /* Ensure text color is white on green background */
+}
+
+.card input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    /* Include padding in width */
+}
+
+.card button {
+    width: 100%;
+    padding: 12px;
+    background-color: #ffffff;
+    color: #cda06d;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.card button:hover {
+    background-color: #cda06d;
+    color: white;
+    /* Change text color on hover for better contrast */
+}
+
+.card a {
+    display: block;
+    margin-top: 10px;
+    color: #555;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+
+/* Student button */
+
+.student-btn {
+    padding: 12px;
+    width: 100%;
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.student-btn:hover {
+    background-color: #333;
+}
+
+.center-links {
+    text-align: center;
+}
+
+.white {
+    color: white;
+    text-decoration: none;
+    /* optional, removes underline */
+}
+
+.a a {
+    color: white;
+    text-decoration: none;
+    /* optional, removes underline */
+}
+
+.a a:hover {
+    color: grey;
+}
+
+
+/* Error messages */
+
+.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: -10px 0 10px 0;
+    color: white;
+    /* Changed error color to white for visibility on green background */
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+
+/* Responsive adjustments */
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        /* Allow height to adjust */
+        min-height: 100vh;
+    }
+    .left {
+        padding: 40px 30px;
+    }
+    .right {
+        padding: 40px 30px;
+    }
+    .left h1 {
+        font-size: 28px;
+    }
+    .left p {
+        font-size: 16px;
+    }
+    .card {
+        padding: 30px 20px;
+    }
+    .right h2 {
+        font-size: 28px;
+    }
+    .card h3 {
+        font-size: 20px;
+    }
+    .card h5 {
+        font-size: 14px;
+    }
+    .card input,
+    .card button,
+    .student-btn {
+        padding: 10px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .left,
+    .right {
+        padding: 30px 20px;
+    }
+    .left h1 {
+        font-size: 24px;
+    }
+    .left p {
+        font-size: 14px;
+    }
+    .right h2 {
+        font-size: 24px;
+    }
+}
+

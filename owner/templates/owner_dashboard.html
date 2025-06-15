@@ -564,7 +564,6 @@
                     >View Listing</a
                   >
                   <a href="#" class="edit-listing">Edit</a> 
-                  <a href="#" class="view-bookings">Bookings</a> 
                 </div>
               </li>
               {% endfor %}
@@ -624,9 +623,8 @@
               <li>
                 <h4>{{ req.issue_title }} (for {{ req.property.title }})</h4>
                 <p>
-                  Submitted by: {{
-                  req.submitted_by.full_name|default:req.submitted_by.username
-                  }}
+                  Submitted by: 
+                  {{ req.submitted_by.full_name|default:req.submitted_by.username}}
                 </p>
                 <p>{{ req.issue_description|truncatechars:100 }}</p>
                 <div class="status-priority">
@@ -641,8 +639,7 @@
                   >Submitted: {{ req.submitted_date|date:"F d, Y P" }}</small
                 >
                 <div class="maintenance-actions-mini">
-                  {# These buttons would link to views that update maintenance
-                  status #}
+                  {# These buttons would link to views that update maintenance status #}
                   <a href="#" class="mark-in-progress">In Progress</a>
                   <a href="#" class="mark-completed">Completed</a>
                   <a href="#" class="reject-request">Reject</a> 

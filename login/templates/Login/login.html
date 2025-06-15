@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Login | RentUrHouse</title>
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link id="themeStylesheet" rel="stylesheet" href="{% static 'css/owner_theme.css' %}">
 </head>
 
 <body>
@@ -51,7 +51,7 @@
                 <div class="center-links">
                     <div class="a">
                         <a href="#">Forgot Password?</a><br> {# REGISTER URL IS NAMESPACED login:register_user #}
-                        <a href="{% url 'login:register_user' %}">Register as new user</a>
+                        <a >Register as new user</a>
                     </div>
                 </div>
             </div>
@@ -68,17 +68,21 @@
 
             // Function to update UI based on role
             function updateUIForRole(role) {
-                if (role === 'owner') {
-                    welcomeMessage.textContent = 'Welcome back, Owner!';
-                    toggleRoleBtn.textContent = 'Login as Student';
-                    roleTypeInput.value = 'owner';
-                } else { // role === 'student'
+                const stylesheet = document.getElementById('themeStylesheet');
+                if (role === 'student') {
+                    stylesheet.href = "{% static 'css/student_theme.css' %}";
                     welcomeMessage.textContent = 'Welcome back, Student!';
                     toggleRoleBtn.textContent = 'Login as Owner';
                     roleTypeInput.value = 'student';
+                } else {
+                    stylesheet.href = "{% static 'css/owner_theme.css' %}";
+                    welcomeMessage.textContent = 'Welcome back, Owner!';
+                    toggleRoleBtn.textContent = 'Login as Student';
+                    roleTypeInput.value = 'owner';
                 }
                 currentRole = role;
             }
+
 
             // Handle button click
             toggleRoleBtn.addEventListener('click', function() {
