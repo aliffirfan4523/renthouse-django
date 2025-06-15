@@ -87,16 +87,26 @@ class PropertyDetailView(DetailView):
     """
     model = Property
     template_name = 'property_details.html'
-    context_object_name = 'property' # The variable name to use in the template
+    context_object_name = 'property'
 
     def get_context_data(self, **kwargs):
         """
         Adds additional context variables to the template.
         """
         context = super().get_context_data(**kwargs)
+
+        # Check if the current user has any confirmed bookings (active tenant)
+        is_active_tenant = Booking.objects.filter(
+            tenant=self.request.user, status='confirmed'
+        ).exists()
+
+        # Add to context to use in the template
+        context['is_active_tenant'] = is_active_tenant
         context['logo_text_color'] = '#7fc29b'
         context['header_button_color'] = '#e91e63'
+
         return context
+
 
 
 # --- book_property view (MODIFIED: Corrected logic for saving AdditionalOccupant) ---

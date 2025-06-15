@@ -528,7 +528,9 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        
+        .hidden {
+    display: none !important;
+}
         .action-buttons {
             display: flex;
             flex-wrap: wrap;
@@ -536,6 +538,8 @@
             justify-content: center;
         }
         
+        /* Make sure the button appears visually disabled */
+
         .action-button {
             flex: 1;
             padding: 15px 20px;
@@ -588,6 +592,10 @@
                 flex-direction: column;
                 gap: 20px;
             }
+
+            .booking-section .action-button.book-now.hidden {
+    display: none;
+}
             .left-column,
             .right-column {
                 min-width: unset;
@@ -908,23 +916,38 @@
                         {% endfor %}
                     </div>
                 </section>
+<!-- Booking / Chat Section -->
+<section class="booking-section">
+    <div class="price-details">RM {{ property.rent }} / Month</div>
+    <div class="price-breakdown">
+        + RM500 Deposit + RM 80 Security Deposit
+    </div>
+    <div class="spots-left">
+        {% if property.is_available %}
+            Available now
+        {% else %}
+            No spots left
+        {% endif %}
+    </div>
+    <div class="action-buttons">
+        {% if property.is_available %}
+            <!-- Check if the user has any active bookings -->
+            {% if is_active_tenant %}
+                <!-- If the user has an active booking, hide the "Book Now" button by adding the 'hidden' class -->
+                <a href="#" class="action-button book-now hidden">You already have a booking</a>
+            {% else %}
+                <!-- If the user doesn't have a booking, show the "Book Now" button -->
+                <a href="{% url 'users:book_property' pk=property.pk %}" class="action-button book-now">Book now</a>
+            {% endif %}
+        {% else %}
+            <button class="action-button book-now" disabled>Fully Booked</button> <!-- Disabled if not available -->
+        {% endif %}
+        <a href="{% url 'users:chat_with_user' property_pk=property.pk other_user_pk=property.owner.pk %}" class="action-button chat-owner">Message Host</a>
+    </div>
+</section>
 
-                <!-- Booking / Chat Section -->
-                <section class="booking-section">
-                    <div class="price-details">RM {{ property.rent }} / Months</div>
-                    <div class="price-breakdown">
-                        + RM500 Deposit + RM 80 Security Deposit
-                    </div>
-                    <div class="spots-left">
-                        {% if property.is_available %} Available now{% if property.is_available == True %}s{% endif %} {% else %} No spots left {% endif %}
-                    </div>
-                    <div class="action-buttons">
-                        {% if property.is_available %}
-                        <a href="{% url 'users:book_property' pk=property.pk %}" class="action-button book-now">Book now</a> {% else %}
-                        <button class="action-button book-now" disabled>Fully Booked</button> {% endif %}
-                        <a href="{% url 'users:chat_with_user' property_pk=property.pk other_user_pk=property.owner.pk %}" class="action-button chat-owner">Message Host</a>
-                    </div>
-                </section>
+
+
             </div>
         </div>
     </div>
