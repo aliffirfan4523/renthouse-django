@@ -1,12 +1,15 @@
 import json
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView
 from django.contrib import messages
 from users.models import PaymentRecord, Property, Booking, MaintenanceRequest, ChatMessage, CustomUser, PropertyForm # Import all necessary models
 from django.db.models import Q # Q object for complex queries
 from django.urls import reverse # To dynamically get URL patterns
-from datetime import date # For current date comparisons
+from django.utils import timezone
+from datetime import date,datetime # For current date comparisons
 
 
 @login_required
@@ -237,3 +240,46 @@ def reject_booking(request, booking_pk):
         messages.warning(request, "Invalid request method.") # Should only be accessed via POST
 
     return redirect('owner:owner_dashboard') # Redirect back to owner dashboard
+
+def update_status(request, id):
+    # Fetch the maintenance request by ID
+    maintenance_request = get_object_or_404(MaintenanceRequest, id=id)
+
+    # Get the new status from the form
+    new_status = request.POST.get('status')
+
+    # If the new status is valid, update the request
+    if new_status in dict(MaintenanceRequest.STATUS_CHOICES).keys():
+        maintenance_request.status = new_status
+        maintenance_request.save()
+        messages.success(request, f"Status updated to {new_status.capitalize()}.")
+    else:
+        messages.error(request, "Invalid status change.")
+
+    # Redirect back to the dashboard
+    return redirect('owner:owner_dashboard')
+
+def resolve_note_view(request, req_id):
+    # Get the maintenance request
+    maintenance_request = get_object_or_404(MaintenanceRequest, id=req_id)
+
+    if request.method == 'POST':
+        # Get data from the form submission
+        resolution_notes = request.POST.get('resolution_notes')
+        status = request.POST.get('status')
+        resolved_date = timezone.now()  # Automatically set the resolve date as the current time
+
+
+        
+        # Save the resolve note, status, and resolve date
+        maintenance_request.resolution_notes = resolution_notes
+        maintenance_request.status = status
+        maintenance_request.resolved_date = resolved_date
+
+        # Save the changes to the database
+        maintenance_request.save()
+
+        # Redirect back to the owner dashboard after saving
+        return redirect('owner:owner_dashboard')  # Adjust the name of the view if necessary
+
+    return JsonResponse({"success": False, "message": "Invalid request."})

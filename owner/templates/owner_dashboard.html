@@ -390,7 +390,47 @@
         margin-left: 10px;
         flex-shrink: 0;
       }
+      .status-btn{
+        border: none;
+      }
 
+      .status-btn {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    color: #333;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.status-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.status-btn.selected {
+    background-color: #003477;
+    color: white;
+}
+
+      .add-note-btn{
+        color:#553300;
+        padding: 5px 10px;
+        border-radius: 5px;
+        background-color: #ffaa3b;
+        border:none;
+      }
+
+      .submit-update{
+        margin-top: 10px;
+        color: #ffffff;
+        padding: 5px 10px;
+        background-color: #0cb603;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+      }
       /* Payment Tracking Card (Placeholder) */
       .payment-status-info {
         font-size: 18px;
@@ -423,6 +463,8 @@
         text-align: center;
         padding: 20px;
       }
+
+      
 
       @media (max-width: 768px) {
         .property-list li {
@@ -615,49 +657,74 @@
           </div>
 
           <!-- Maintenance Requests Card -->
-          <div class="dashboard-card">
-            <h2>Maintenance Requests</h2>
-            {% if owner_maintenance_requests %}
-            <ul class="maintenance-request-list">
-              {% for req in owner_maintenance_requests %}
-              <li>
-                <h4>{{ req.issue_title }} (for {{ req.property.title }})</h4>
-                <p>
-                  Submitted by: 
-                  {{ req.submitted_by.full_name|default:req.submitted_by.username}}
-                </p>
-                <p>{{ req.issue_description|truncatechars:100 }}</p>
-                <div class="status-priority">
-                  <span class="status-{{ req.status }}"
-                    >{{ req.get_status_display }}</span
-                  >
-                  <span class="priority-{{ req.priority }}"
-                    >{{ req.get_priority_display }} Priority</span
-                  >
-                </div>
-                <small style="display: block; text-align: right; color: #a0aec0"
-                  >Submitted: {{ req.submitted_date|date:"F d, Y P" }}</small
-                >
-                <div class="maintenance-actions-mini">
-                  {# These buttons would link to views that update maintenance status #}
-                  <a href="#" class="mark-in-progress">In Progress</a>
-                  <a href="#" class="mark-completed">Completed</a>
-                  <a href="#" class="reject-request">Reject</a> 
-                  <a
-                    href="{% url 'users:chat_with_user' property_pk=req.property.pk other_user_pk=req.submitted_by.pk %}"
-                    class="message-tenant"
-                    >Message Tenant</a
-                  >
-                </div>
-              </li>
-              {% endfor %}
-            </ul>
-            {% else %}
-            <p class="empty-state-message">
-              No maintenance requests for your properties.
-            </p>
-            {% endif %}
+<!-- Maintenance Request Card -->
+<div class="dashboard-card">
+  <h2>Maintenance Requests</h2>
+  {% if owner_maintenance_requests %}
+  <ul class="maintenance-request-list">
+      {% for req in owner_maintenance_requests %}
+      <li>
+          <h4>{{ req.issue_title }}</h4>
+          <p>Submitted by: {{ req.submitted_by.full_name|default:req.submitted_by.username }}</p>
+          <p>{{ req.issue_description|truncatechars:100 }}</p>
+          <div class="status-priority">
+              <span class="status-{{ req.status }}">{{ req.get_status_display }}</span>
+              <span class="priority-{{ req.priority }}">{{ req.get_priority_display }} Priority</span>
           </div>
+          <small style="display: block; text-align: right; color: #a0aec0">
+              Submitted: {{ req.submitted_date|date:"F d, Y P" }}
+          </small>
+
+          <!-- Resolution Notes Section (Always visible if there are notes) -->
+          {% if req.resolution_notes %}
+          <div class="resolve-note">
+              <p><strong>Action Taken:</strong> {{ req.resolution_notes }}</p>
+              <small style="display: block; text-align: right; color: #a0aec0">
+                  Resolved: {{ req.resolved_date|date:"F d, Y P" }}
+              </small>
+          </div>
+          {% endif %}
+
+          <!-- Always Show "Add Note" Button -->
+          <div class="add-note-section">
+              <button class="add-note-btn" onclick="showResolveNoteForm({{ req.id }})">Add Note</button>
+          </div>
+
+          <!-- Note Form -->
+          <div class="resolve-note-form" id="resolve-note-form-{{ req.id }}" style="display: none; padding-top: 10px;">
+              <form method="POST" action="{% url 'owner:resolve_note' req.id %}">
+                  {% csrf_token %}
+                  <!-- Resolve Note Input -->
+                  <div><label for="note-{{ req.id }}">Resolve note:</label></div>
+                  <textarea id="note-{{ req.id }}" name="resolution_notes" rows="3" placeholder="Enter resolution note" style="width: 100%;"></textarea>
+
+                  <!-- Hidden Field for Status -->
+                  <input type="hidden" id="status-{{ req.id }}" name="status" value="{{ req.status }}">
+
+                  <div><label for="status-{{ req.id }}">Status:</label></div>
+                  <div class="maintenance-actions-mini">
+                      {% for status_value, status_label in req.STATUS_CHOICES %}
+                          {% if req.status != status_value %}
+                              <button type="button" class="status-btn" 
+                                      id="status-btn-{{ status_value }}-{{ req.id }}" 
+                                      onclick="selectStatus('{{ status_value }}', {{ req.id }})">
+                                  {{ status_label }}
+                              </button>
+                          {% endif %}
+                      {% endfor %}
+                  </div>
+
+                  <button type="submit" class="submit-update">Submit</button>
+              </form>
+          </div>
+      </li>
+      {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty-state-message">No maintenance requests for your properties.</p>
+  {% endif %}
+</div>
+
         </div>
         <!-- Recent Chats Card (reusing template logic, slightly adapted) -->
         <div class="dashboard-column">
@@ -737,6 +804,69 @@
     user.is_authenticated %} {% include 'partials/chat_popup.html' %} {% endif
     %}
 
-    <script src="{% static 'js/main.js' %}"></script>
+    <script > 
+function submitResolveNote(reqId) {
+    const note = document.getElementById('note-' + reqId).value;
+    const status = document.getElementById('status-' + reqId).value;  // Get the status from the hidden input field
+
+    if (note.trim() !== '' && status) {
+        // Send the note, status, and date to the server
+        fetch('/resolve-note/' + reqId + '/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({
+                resolution_notes: note,
+                status: status,
+                resolved_date: new Date().toISOString()
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Note and status updated successfully!');
+                location.reload(); // Reload to show the updated resolve note and status
+            } else {
+                alert('Failed to add note and update status');
+            }
+        });
+    } else {
+        alert('Note cannot be empty and a status must be selected.');
+    }
+}
+
+function selectStatus(statusValue, reqId) {
+    console.log('Selected status: ' + statusValue + ' for request ID: ' + reqId);
+
+    // Update the hidden input field with the selected status
+    const statusInput = document.getElementById('status-' + reqId);
+    statusInput.value = statusValue; // Set the value of the hidden input to the selected status
+
+    // Highlight the selected status button
+    const statusButtons = document.querySelectorAll('.status-btn');
+    statusButtons.forEach(button => button.classList.remove('selected')); // Remove class from all buttons
+
+    // Add the 'selected' class to the clicked button
+    const selectedButton = document.querySelector(`#status-btn-${statusValue}-${reqId}`);
+    if (selectedButton) {
+        selectedButton.classList.add('selected');
+    }
+}
+    function showResolveNoteForm(reqId) {
+      console.log('Displaying form for request id: ' + reqId);  // Debugging log
+      const form = document.getElementById('resolve-note-form-' + reqId);
+      if (form) {
+        form.style.display = 'block';
+      } else {
+        console.error('Form not found for request id: ' + reqId);
+      }
+    }
+
+
+
+    
+</script>
   </body>
 </html>

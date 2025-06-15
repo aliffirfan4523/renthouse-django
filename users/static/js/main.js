@@ -175,3 +175,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (msgs) msgs.style.display = 'none';
   }, 4000);  // Hide after 4 seconds
 });
+
+function showResolveNoteForm(reqId) {
+    document.getElementById('resolve-note-form-' + reqId).style.display = 'block';
+}
+
