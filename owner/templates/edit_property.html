@@ -1,22 +1,26 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Property: {{ property.title }} | RentUrHouse</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/main_app.css' %}"> {# Your combined CSS #}
-    <style>
+    <link rel="stylesheet" href="{% static 'css/main_app.css' %}">
+    <style>/* Base Styles */
+
+        /* General Body and Container */
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
-            background-color: var(--background-dark);
+            background-color: #f0f2f5; /* Light gray background */
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
+        /* Header (reuse styles from other pages or main_app.css) */
         .header {
             background-color: white;
             padding: 15px 20px;
@@ -27,265 +31,329 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             border-radius: 0 0 10px 10px;
         }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { font-size: 24px; color: #4a5568; }
+        .logo-text { font-size: 20px; font-weight: 600; color: #2d3748; }
+        .header-right { display: flex; align-items: center; gap: 15px; position: relative; }
+        .profile-menu { position: relative; display: inline-block; }
+        .profile-dropdown { display: none; position: absolute; right: 0; top: 100%; background-color: white; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); border-radius: 8px; min-width: 150px; z-index: 100; }
+        .profile-dropdown a { color: #333; padding: 12px 16px; text-decoration: none; display: block; }
+        .profile-dropdown a:hover { background-color: #f5f5f5; }
+        .profile-dropdown.show { display: block; }
+        .header-button { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0 5px; color: #4a5568; }
+        .header-button.profile { background-color: #fce4ec; color: #7fc29b; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .back-link { display: flex; align-items: center; text-decoration: none; color: #4a5568; font-weight: 500; margin-left: 20px; }
+        .back-link svg { margin-right: 5px; font-size: 20px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #2d3748; flex-grow: 1; text-align: center; margin-right: 80px; }
 
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 30px;
-            background-color: var(--background-light);
-            border-radius: 15px;
-            box-shadow: var(--box-shadow);
+
+        /* Form Container */
+        .add-property-container {
             flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top */
+            padding: 40px 20px;
+            box-sizing: border-box;
+            background-color: #45e0ba;
         }
 
-        h2 {
-            color: var(--text-color-dark);
-            font-size: 28px;
-            margin-bottom: 30px;
+        .add-property-card {
+            background-color: rgb(55, 146, 119);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px; /* Wider card for property details */
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Space between sections */
+        }
+
+        .add-property-card h2 {
+            font-size: 30px;
+            color: #2d3748;
+            margin-top: 0;
+            margin-bottom: 20px;
             text-align: center;
-            border-bottom: 2px solid var(--primary-color);
+            border-bottom: 2px solid #7fc29b;
             padding-bottom: 15px;
-            display: block; /* Ensures border spans full width */
         }
 
+        /* Form Styling (reused from booking form for consistency) */
         .form-group {
             margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
             font-weight: 600;
-            color: var(--text-color-medium);
+            color: #ffffff;
+            margin-bottom: 8px;
             font-size: 15px;
         }
 
-        .form-group .form-input,
-        .form-group .form-select,
-        .form-group textarea {
+        .add-property-form input[type="text"],
+        .add-property-form input[type="email"],
+        .add-property-form input[type="number"],
+        .add-property-form input[type="file"],
+        .add-property-form textarea,
+        .add-property-form select {
             width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            border: 1px solid #cbd5e0;
             border-radius: 8px;
             font-size: 16px;
+            color: #2d3748;
             box-sizing: border-box;
-            color: var(--text-color-dark);
-            background-color: var(--background-light);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: #fff;
+        }
+        /* Style for select dropdown arrow */
+        .add-property-form select {
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234a5568%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-6.5H18.6c-5.4%200-10.3%202.2-13.2%206.5-2.9%204.3-2.9%209.6%200%2013.9l127.4%20127.4c2.9%204.3%207.8%206.5%2013.2%206.5s10.3-2.2%2013.2-6.5L287%2083.3c2.9-4.3%202.9-9.6%200-13.9z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 0.7em top 50%;
+            background-size: 0.65em auto;
         }
 
-        .form-group .form-input:focus,
-        .form-group .form-select:focus,
-        .form-group textarea:focus {
+        .add-property-form input:focus,
+        .add-property-form textarea:focus,
+        .add-property-form select:focus {
+            border-color: #7fc29b;
+            box-shadow: 0 0 0 3px rgba(127, 194, 155, 0.2);
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 127, 194, 155), 0.3);
         }
 
-        .form-group .form-input-file {
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            border-radius: 8px;
-            background-color: var(--background-light);
-        }
-
-        .form-group .form-checkbox {
-            margin-right: 10px;
-            transform: scale(1.2);
-            accent-color: var(--primary-color);
-        }
-
-        .form-group .form-checkbox-multiple label {
-            display: inline-block; /* Keep checkboxes and labels inline */
-            margin-right: 15px;
-            font-weight: normal; /* Override bold from main label */
-            color: var(--text-color-medium);
-        }
-
-        .form-group .errorlist {
+        .add-property-form .errorlist {
+            color: #e53e3e;
+            font-size: 13px;
+            margin-top: 5px;
             list-style: none;
             padding: 0;
-            margin-top: 5px;
-            color: var(--error-color);
-            font-size: 0.875rem;
+        }
+        
+        /* Checkbox styling for amenities */
+        .add-property-form ul.checkbox-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Space between checkboxes */
+        }
+        .add-property-form ul.checkbox-list li {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .add-property-form ul.checkbox-list input[type="checkbox"] {
+            width: auto; /* Override 100% width */
+            margin-right: 8px;
+            transform: scale(1.2); /* Slightly larger checkboxes */
+        }
+        .add-property-form ul.checkbox-list label {
+            margin-bottom: 0; /* Remove bottom margin for inline labels */
+            cursor: pointer;
+            font-weight: normal; /* Less bold than field labels */
         }
 
+        /* Submit Button */
         .form-actions {
+            display: flex;
+            justify-content: center;
             margin-top: 30px;
-            text-align: right;
         }
 
-        .submit-btn {
-            background-color: var(--primary-color);
-            color: #63a780;
-            padding: 12px 25px;
-            border-radius: 8px;
+        .submit-button {
+            padding: 15px 30px;
+            border-radius: 10px;
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
             border: none;
-            transition: background-color 0.3s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 10px rgba(var(--primary-color-rgb, 127, 194, 155), 0.3);
+            background-color: #7fc29b; /* Green button */
+            color: white;
+            box-shadow: 0 4px 8px rgba(127, 194, 155, 0.3);
         }
 
-        .submit-btn:hover {
-            background-color: #63a780;
-            color: #63a780;
-            box-shadow: 0 6px 12px rgba(var(--primary-color-rgb, 127, 194, 155), 0.4);
+        .submit-button:hover {
+            background-color: #63a780; /* Darker green on hover */
+            box-shadow: 0 6px 12px rgba(127, 194, 155, 0.4);
         }
 
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            color: var(--link-color);
-            text-decoration: none;
-            font-weight: 500;
+        /* Messages Styling */
+        .messages {
+            list-style: none;
+            padding: 0;
             margin-bottom: 20px;
-            transition: color 0.2s ease;
+            text-align: center;
+        }
+        .messages li {
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+            color: white;
+        }
+        .messages .success {
+            background-color: #4CAF50; /* Green */
+        }
+        .messages .error {
+            background-color: #f44336; /* Red */
+        }
+        .messages .warning {
+            background-color: #ff9800; /* Orange */
+        }
+        .messages .info {
+            background-color: #2196F3; /* Blue */
         }
 
-        .back-link:hover {
-            color: var(--button-hover-background-color); /* Use a darker shade of primary for hover */
-            text-decoration: none;
-        }
 
-        .back-link svg {
-            margin-right: 5px;
-        }
-
-        /* Responsive adjustments */
+        /* Responsive Adjustments */
         @media (max-width: 768px) {
-            .container {
-                margin: 20px auto;
+            .add-property-container {
+                padding: 20px 10px;
+            }
+            .add-property-card {
                 padding: 20px;
-                border-radius: 10px;
             }
-            h2 {
+            .add-property-card h2 {
                 font-size: 24px;
-                margin-bottom: 20px;
             }
-            .form-group label {
-                font-size: 14px;
-            }
-            .form-group .form-input,
-            .form-group .form-select,
-            .form-group textarea {
-                padding: 10px;
+            .add-property-form input,
+            .add-property-form textarea,
+            .add-property-form select {
                 font-size: 15px;
+                padding: 10px 12px;
             }
-            .submit-btn {
-                padding: 10px 20px;
+            .submit-button {
+                padding: 12px 25px;
                 font-size: 16px;
             }
         }
 
         @media (max-width: 480px) {
-            .container {
-                margin: 10px;
-                padding: 15px;
-                box-shadow: none; /* Remove shadow on very small screens */
-                border-radius: 0;
+            .add-property-card {
+                margin: 0 10px;
             }
-            h2 {
+            .add-property-card h2 {
                 font-size: 20px;
-                margin-bottom: 15px;
-                padding-bottom: 10px;
             }
-            .form-group .form-checkbox-multiple label {
-                display: block; /* Stack checkboxes on very small screens */
-                margin-bottom: 5px;
+            .add-property-form ul.checkbox-list {
+                flex-direction: column; /* Stack checkboxes vertically */
             }
         }
     </style>
-</head>
-<body>
-    <!-- Header Section (Assuming it's included or you manually add it) -->
-    <header class="header">
-        <div class="header-left">
-            <a href="{% url 'owner:owner_dashboard' %}" class="back-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg> Back to Dashboard
-            </a>
-        </div>
-        <div class="page-title">Edit Property</div>
-        <div class="header-right">
-            <div class="profile-menu">
-                <a href="#" id="menu-button">
-                    <img class="logo-icon" src="{% static 'img/Menu Button.svg' %}" alt="Menu" width="120" height="40">
-                </a>
-                <div class="profile-dropdown" id="menu-dropdown">
-                    {% if user.is_authenticated %}
-                    <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
-
+        
+        <body>
+            <!-- Header Section (reused from other templates) -->
+            <header class="header">
+                <div class="header-left">
+                    <a href="{% url 'owner:owner_dashboard' %}" class="back-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg> Back to Home
+                    </a>
                 </div>
-            </div>
-        </div>
-    </header>
 
-    <div class="container">
-
-        <h2>Edit Property: {{ property.title }}</h2>
-
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li class="{{ message.tags }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-
-        <form method="post" enctype="multipart/form-data"> {# Add enctype for file uploads #}
-            {% csrf_token %}
-
-            {% for field in form %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">
-                        {{ field.label }}
-                        {% if field.field.required %} <span style="color: red;">*</span>{% endif %}
-                    </label>
-                    {{ field }}
-                    {% if field.help_text %}
-                        <small class="text-gray-500 text-sm">{{ field.help_text }}</small>
-                    {% endif %}
-                    {% if field.errors %}
-                        <ul class="errorlist">
-                            {% for error in field.errors %}
-                                <li>{{ error }}</li>
+                <div class="header-right">
+                    <div class="profile-menu">
+                        <a href="#" id="menu-button">
+                            <img class="logo-icon" src="{% static 'img/Menu Button.svg' %}" alt="Menu" width="120" height="40">
+                        </a>
+                        <div class="profile-dropdown" id="menu-dropdown">
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'login:logout' %}">Sign Out</a>{% else %} <a href="{% url 'login:login' %}">Log In</a> {% endif %}
+        
+                        </div>
+                    </div>
+                </div>
+            </header>
+        
+            <div class="add-property-container">
+                <div class="add-property-card">
+                    <h2 style="color: #9cdfbd;">Edit Your Properties</h2>
+        
+                    {# Display Django messages (success/error) #}
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li class="{{ message.tags }}">{{ message }}</li>
                             {% endfor %}
                         </ul>
                     {% endif %}
+        
+                    <form method="post" enctype="multipart/form-data" class="add-property-form">
+                        {% csrf_token %}
+                        
+                        {# Display non-field errors if any #}
+                        {% if form.non_field_errors %}
+                            <ul class="errorlist">
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+        
+                        {# Iterate over form fields to render them #}
+                        {% for field in form %}
+                            <div class="form-group">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <small class="help-text">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <ul class="errorlist">
+                                        {% for error in field.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+        
+                        <div class="form-actions">
+                            <button type="submit" class="submit-button">Add Property</button>
+                        </div>
+                    </form>
                 </div>
-            {% endfor %}
-
-            <div class="form-actions">
-                <button type="submit" class="submit-btn">Save Changes</button>
             </div>
-        </form>
-    </div>
-
-    {# Include your chat popup partial if applicable #}
-    {% if user.is_authenticated %} {% include 'partials/chat_popup.html' %} {% endif %}
-
-    <script src="{% static 'js/main.js' %}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Profile dropdown logic
-            const menuButton = document.querySelector('.profile-menu .header-button.profile');
-            const profileDropdown = document.querySelector('.profile-menu .profile-dropdown');
-
-            if (menuButton && profileDropdown) {
-                menuButton.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    profileDropdown.classList.toggle('show');
-                });
-
-                document.addEventListener('click', function(event) {
-                    if (!profileDropdown.contains(event.target) && !menuButton.contains(event.target)) {
-                        profileDropdown.classList.remove('show');
+        
+            <!-- Optional chat popup include -->
+            {% if user.is_authenticated %}
+            {% include 'partials/chat_popup.html' %}
+            {% endif %}
+        
+            <script src="{% static 'js/main.js' %}"></script>
+        
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Dropdown menu logic for user profile
+                    const menuButton = document.querySelector('.profile-menu .header-button.profile');
+                    const profileDropdown = document.querySelector('.profile-menu .profile-dropdown');
+        
+                    if (menuButton && profileDropdown) {
+                        menuButton.addEventListener('click', function (event) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            profileDropdown.classList.toggle('show');
+                        });
+        
+                        document.addEventListener('click', function (event) {
+                            if (!profileDropdown.contains(event.target) && !menuButton.contains(event.target)) {
+                                profileDropdown.classList.remove('show');
+                            }
+                        });
                     }
                 });
-            }
-        });
-    </script>
-</body>
-</html>
+            </script>
+        
+        </body>
+        
+        </html>
+        
