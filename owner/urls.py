@@ -16,5 +16,6 @@ urlpatterns = [
     path('bookings/<int:booking_pk>/reject/', views.reject_booking, name='reject_booking'),
     path('maintenance-request/update-status/<int:id>/', views.update_status, name='update_status'),
     path('resolve-note/<int:req_id>/', views.resolve_note_view, name='resolve_note'),
+        path('receipt/<int:pk>/pdf/', views.receipt_view_owner, name='receipt_pdf'),
     # Add URLs for booking actions (confirm/reject) and maintenance actions later
 ]

@@ -1,0 +1,349 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt | RentUrHouse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header (reusing from previous immersives) */
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-radius: 0 0 10px 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+            color: #4a5568;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #7fc29b;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        .header-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+            color: #4a5568;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .header-button.profile {
+            background-color: #fce4ec;
+            color: #7fc29b;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-button.profile:hover {
+            background-color: #f8bbd0;
+            transform: translateY(-2px);
+        }
+        .profile-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            min-width: 150px;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .profile-dropdown a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .profile-dropdown a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        /* Receipt styling */
+        .receipt-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 80px); /* Adjust for header height */
+            padding: 20px;
+            box-sizing: border-box;
+            flex-grow: 1;
+        }
+
+        .receipt-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .receipt-card h2 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #7fc29b;
+            padding-bottom: 15px;
+            display: inline-block;
+        }
+
+        .receipt-details {
+            text-align: left;
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #f7fafc;
+        }
+
+        .receipt-details p {
+            font-size: 16px;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .receipt-details p strong {
+            color: #2d3748;
+            display: inline-block;
+            width: 150px; /* Align labels */
+        }
+
+        .receipt-details p:last-child {
+            margin-bottom: 0;
+        }
+
+        .download-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 30px;
+            transition: background-color 0.3s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+        }
+
+        .download-btn:hover {
+            background-color: #0056b3;
+            box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
+        }
+        /* Messages styling */
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .messages li {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .messages .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .receipt-card {
+                padding: 25px;
+            }
+            .receipt-card h2 {
+                font-size: 24px;
+            }
+            .receipt-details p {
+                font-size: 15px;
+            }
+            .receipt-details p strong {
+                width: 120px;
+            }
+            .download-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .receipt-container {
+                padding: 10px;
+            }
+            .receipt-card {
+                border-radius: 0;
+                padding: 20px;
+            }
+            .receipt-card h2 {
+                font-size: 20px;
+            }
+            .receipt-details p strong {
+                display: block; /* Stack labels on smaller screens */
+                width: auto;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-left">
+            <a href="{% url 'owner:owner_dashboard' %}" class="back-link flex items-center text-gray-600 font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left mr-1">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Home
+            </a>
+        </div>
+        <div class="header-right">
+            {% if user.is_authenticated %}
+                <button id="openChatPopupBtn" class="header-button profile" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-2.2c-.3-.4-.6-.8-.8-1.3A8.5 8.5 0 0 1 12 3a8.5 8.5 0 0 1 9 8.5z"></path></svg>
+                </button>
+                <div class="profile-menu">
+                    <button class="header-button profile" id="menu-button">👤</button>
+                    <div class="profile-dropdown" id="menu-dropdown">
+                         
+                        <a href="{% url 'login:logout' %}">Sign Out</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login:login' %}" class="header-button">Log In</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="receipt-container">
+        <div class="receipt-card">
+            <h2>Payment Receipt</h2>
+
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <p class="text-gray-700 text-lg mb-4">Payment Receipt From  {{ payment_record.full_name }}</p>
+
+            <div class="receipt-details">
+                <p><strong>Payment ID:</strong> {{ payment_record.pk }}</p>
+                <p><strong>Transaction ID:</strong> {{ payment_record.transaction_id }}</p>
+                <p><strong>Name:</strong> {{ payment_record.full_name }}</p>
+                <p><strong>Email:</strong> {{ payment_record.email }}</p>
+                {% if payment_record.phone_number %}
+                    <p><strong>Phone:</strong> {{ payment_record.phone_number }}</p>
+                {% endif %}
+                <p><strong>Amount Paid:</strong> RM {{ payment_record.amount }}</p>
+                <p><strong>Payment Method:</strong> {{ payment_record.payment_method }}</p>
+                <p><strong>Date:</strong> {{ payment_record.payment_date|date:"F d, Y " }}</p>
+                {% if payment_record.user %}
+                    <p><strong>Paid By User:</strong> {{ payment_record.user.username }}</p>
+                {% endif %}
+                {% if payment_record.booking %}
+                    <p><strong>For Booking:</strong> #{{ payment_record.booking.pk }} ({{ payment_record.booking.property.title }})</p>
+                {% endif %}
+                {% if payment_record.receiver_of_payment %}
+                    <p><strong>Received By:</strong> {{ payment_record.receiver_of_payment.full_name|default:payment_record.receiver_of_payment.username }}</p>
+                {% endif %}
+            </div>
+
+            <a href="{% url 'users:receipt_pdf' pk=payment_record.pk %}" class="download-btn">Download as PDF</a>
+        </div>
+    </div>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profile dropdown logic from other pages
+            const menuButton = document.getElementById('menu-button');
+            const menuDropdown = document.getElementById('menu-dropdown');
+
+            if (menuButton && menuDropdown) {
+                menuButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    menuDropdown.classList.toggle('show');
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!menuDropdown.contains(event.target) && !menuButton.contains(event.target)) {
+                        menuDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

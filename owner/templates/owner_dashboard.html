@@ -793,7 +793,7 @@
                                     <strong>Method:</strong> {{ payment.payment_method }}
                                 </div>
                                 <span class="payment-item-status">Received</span>
-                                <a href="{% url 'users:receipt' pk=payment.pk %}" class="payment-action-btn">View Receipt</a>
+                                <a href="{% url 'owner:receipt_pdf' pk=payment.pk %}" class="payment-action-btn">View Receipt</a>
                             </li>
                         {% endfor %}
                     </ul>

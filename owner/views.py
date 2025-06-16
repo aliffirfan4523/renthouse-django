@@ -1,16 +1,17 @@
 import json
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView
 from django.contrib import messages
+import pdfkit
 from users.models import PaymentRecord, Property, Booking, MaintenanceRequest, ChatMessage, CustomUser, PropertyForm # Import all necessary models
 from django.db.models import Q # Q object for complex queries
 from django.urls import reverse # To dynamically get URL patterns
 from django.utils import timezone
 from datetime import date,datetime # For current date comparisons
-
+from django.template.loader import render_to_string # Import render_to_string
 
 @login_required
 def owner_dashboard(request):
@@ -315,3 +316,16 @@ def edit_property(request, pk):
         'header_button_color': '#e91e63',
     }
     return render(request, 'edit_property.html', context)
+
+def receipt_view_owner(request, pk):
+    """
+    Displays the payment receipt by retrieving the PaymentRecord from the database.
+    """
+    payment_record = get_object_or_404(PaymentRecord, pk=pk)
+
+    context = {
+        'payment_record': payment_record,
+        'logo_text_color': '#7fc29b',
+        'header_button_color': '#e91e63',
+    }
+    return render(request, 'receipt.html', context)
